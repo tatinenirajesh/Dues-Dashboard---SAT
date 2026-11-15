@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sri Anjaneya Township - Advanced Analytics &amp; Dues Portal</title>
+    <title>Sri Anjaneya Township - Advanced Analytics &amp; Dues Portal (198 Flats Master)</title>
     <!-- SheetJS for Excel Export/Import -->
     <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
     <!-- Chart.js for Trend Graph Analytics -->
@@ -278,7 +278,7 @@
 
         .chart-container {
             position: relative;
-            height: 360px;
+            height: 380px;
             width: 100%;
             margin-top: 15px;
         }
@@ -349,7 +349,7 @@
                     <thead>
                         <tr>
                             <th>Month</th>
-                            <th>Receipt No.</th>
+                            <th>Receipt No. (RT No.)</th>
                             <th>Amount Paid</th>
                             <th>Status</th>
                         </tr>
@@ -384,27 +384,32 @@
         <div class="card">
             <div class="admin-actions">
                 <div>
-                    <h3 style="font-size: 1.05rem; margin-bottom: 4px;">Block-Wise Collection Summary</h3>
-                    <p style="font-size: 0.85rem; color: var(--text-muted);">Export current 198-flat ledger to Excel or upload an updated workbook.</p>
+                    <h3 style="font-size: 1.05rem; margin-bottom: 4px;">Block-Wise Collection Summary (Monthly &amp; FY Toggle)</h3>
+                    <p style="font-size: 0.85rem; color: var(--text-muted);">Toggle view breakdown by Financial Year or Month across all blocks.</p>
                 </div>
-                <div style="display: flex; gap: 10px; flex-wrap: wrap;">
-                    <label class="btn btn-outline" style="margin: 0; cursor: pointer;">
+                <div style="display: flex; gap: 10px; flex-wrap: wrap; align-items: center;">
+                    <select id="adminViewMode" onchange="renderAdminSummary()" style="padding: 6px 12px; font-size: 0.85rem;">
+                        <option value="fy">View by Financial Year (FY)</option>
+                        <option value="month">View by Month</option>
+                    </select>
+                    <select id="adminStatusFilter" onchange="renderAdminSummary()" style="padding: 6px 12px; font-size: 0.85rem;">
+                        <option value="ALL">Status: All</option>
+                        <option value="PAID">Status: Paid Only</option>
+                        <option value="UNPAID">Status: Unpaid Only</option>
+                    </select>
+                    <label class="btn btn-outline" style="margin: 0; cursor: pointer; padding: 6px 14px; font-size: 0.85rem;">
                         Import Excel (.xlsx)
                         <input type="file" accept=".xlsx, .xls" onchange="importExcel(event)" style="display: none;">
                     </label>
-                    <button class="btn" onclick="exportExcel()">Export to Excel</button>
+                    <button class="btn" style="padding: 6px 14px; font-size: 0.85rem;" onclick="exportExcel()">Export</button>
                 </div>
             </div>
 
             <div class="table-wrapper">
                 <table>
                     <thead>
-                        <tr>
-                            <th>Block</th>
-                            <th>Total Flats</th>
-                            <th>Collected Amount</th>
-                            <th>Pending Amount</th>
-                            <th>Collection %</th>
+                        <tr id="adminTableHeadRow">
+                            <!-- Dynamic Table Header -->
                         </tr>
                     </thead>
                     <tbody id="blockSummaryBody"></tbody>
@@ -458,7 +463,7 @@
             </div>
 
             <h3 style="font-size: 1.05rem; margin-top: 20px; margin-bottom: 6px;">Multi-Block &amp; Flat Trend Analytics (Line Chart)</h3>
-            <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 10px;">Comparing collections and dues over time with distinct block/flat color mapping.</p>
+            <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 10px;">Comparing collections over time with distinct block and flat color mappings.</p>
             <div class="chart-container">
                 <canvas id="trendChart"></canvas>
             </div>
@@ -467,8 +472,8 @@
 </div>
 
 <script>
-    // Generate Complete Master Township Dataset (Blocks A, B, C, D, F -> Exactly 198 Flats)
-    // Block F excludes 308 and 508 (duplexes integrated into 208 & 408 with 4k rate), yielding 38 flats in F and 40 in A, B, C, D.
+    // Exact 198 Flats Master Data Generation
+    // Blocks A, B, C, D (40 flats each = 160) + Block F (38 flats, excluding 308 & 508 = 38). Total = 198.
     const blocksList = ["A", "B", "C", "D", "F"];
     const floors = [1, 2, 3, 4, 5];
     const units = [1, 2, 3, 4, 5, 6, 7, 8];
@@ -492,33 +497,32 @@
             units.forEach(unit => {
                 const flatNo = `${floor}${unit < 10 ? '0' + unit : unit}`;
                 
-                // Skip 308 and 508 in Block F as per duplex rules
+                // Exclude 308 & 508 in Block F
                 if (block === "F" && (flatNo === "308" || flatNo === "508")) {
                     return;
                 }
 
                 let standardRate = 2000;
-                if ((floor === 1 && (unit === 4 || unit === 5 || unit === 8)) || block === "A" && unit === 1) {
+                if ((floor === 1 && (unit === 4 || unit === 5 || unit === 8)) || (block === "A" && unit === 1)) {
                     standardRate = 2500;
                 }
-                // Duplex units in F block
                 if (block === "F" && (flatNo === "208" || flatNo === "408")) {
-                    standardRate = 4000;
+                    standardRate = 4000; // Duplex rate
                 }
 
                 let monthsArr = monthsDef.map(m => {
-                    // Seed some sample mock payment statuses for demonstration
+                    // Populate active realistic payment & receipt number if paid
                     let isPaid = (m.fy === "FY 2025-26" || (m.fy === "FY 2026-27" && ["April - 26", "May - 26", "June - 26", "July - 26", "August - 26", "September - 26", "October - 26", "November - 26"].includes(m.month)));
                     return {
                         month: m.month,
                         fy: m.fy,
-                        receiptNo: isPaid ? `RCP-${block}-${flatNo}-${m.month.substring(0,3)}` : "",
+                        receiptNo: isPaid ? `RT-${block}-${flatNo}-${m.month.substring(0,3)}` : "",
                         amount: isPaid ? standardRate : 0
                     };
                 });
 
                 townshipData[block][flatNo] = {
-                    name: `Resident ${block}-${flatNo}`,
+                    name: `${block} ${flatNo} - Resident`,
                     months: monthsArr
                 };
             });
@@ -527,17 +531,18 @@
 
     let trendChartInstance = null;
     const blockColors = {
-        "A": "#2563eb", // Blue
-        "B": "#16a34a", // Green
-        "C": "#d97706", // Amber
-        "D": "#9333ea", // Purple
-        "F": "#dc2626"  // Red
+        "A": "#2563eb", 
+        "B": "#16a34a", 
+        "C": "#d97706", 
+        "D": "#9333ea", 
+        "F": "#dc2626"  
     };
 
     // Initialize Page
     window.onload = function() {
         populateFlats();
         calculateKPIs();
+        renderAdminSummary();
         initSlicers();
         applySlicers();
     };
@@ -553,6 +558,7 @@
             document.querySelectorAll('.tab')[1].classList.add('active');
             document.getElementById('adminPanel').classList.add('active');
             calculateKPIs();
+            renderAdminSummary();
         } else if (tab === 'analytics') {
             document.querySelectorAll('.tab')[2].classList.add('active');
             document.getElementById('analyticsPanel').classList.add('active');
@@ -569,7 +575,7 @@
             Object.keys(townshipData[block]).sort().forEach(flat => {
                 const option = document.createElement('option');
                 option.value = flat;
-                option.text = `Flat ${flat} - ${townshipData[block][flat].name}`;
+                option.text = `${townshipData[block][flat].name}`;
                 flatSelect.appendChild(option);
             });
         }
@@ -601,7 +607,7 @@
             const tr = document.createElement('tr');
             tr.innerHTML = `
                 <td><strong>${m.month}</strong> (${m.fy})</td>
-                <td>${m.receiptNo ? m.receiptNo : '<span style="color:#94a3b8;">-</span>'}</td>
+                <td>${isPaid ? `<strong>${m.receiptNo}</strong>` : '<span style="color:#94a3b8;">-</span>'}</td>
                 <td>${isPaid ? '₹' + m.amount.toLocaleString('en-IN') : '₹0'}</td>
                 <td><span class="badge ${isPaid ? 'paid' : 'unpaid'}">${isPaid ? 'PAID' : 'UNPAID'}</span></td>
             `;
@@ -616,51 +622,19 @@
         let totalCollected = 0;
         let totalExpected = 0;
 
-        const summaryBody = document.getElementById('blockSummaryBody');
-        summaryBody.innerHTML = '';
-
-        Object.keys(townshipData).sort().forEach(block => {
-            let bFlats = 0;
-            let bCollected = 0;
-            let bExpected = 0;
-
+        Object.keys(townshipData).forEach(block => {
             Object.keys(townshipData[block]).forEach(flat => {
-                bFlats++;
                 totalFlats++;
                 const record = townshipData[block][flat];
-                
                 let stdRate = 2000;
                 for (let m of record.months) {
-                    if (m.amount > 0) {
-                        stdRate = m.amount;
-                        break;
-                    }
+                    if (m.amount > 0) { stdRate = m.amount; break; }
                 }
-
                 record.months.forEach((m, idx) => {
-                    if (m.amount > 0) {
-                        bCollected += m.amount;
-                        totalCollected += m.amount;
-                    }
-                    if (idx < 20) { // Active window count
-                        bExpected += stdRate;
-                        totalExpected += stdRate;
-                    }
+                    if (m.amount > 0) totalCollected += m.amount;
+                    if (idx < 20) totalExpected += stdRate;
                 });
             });
-
-            let bPending = Math.max(0, bExpected - bCollected);
-            let bRate = bExpected > 0 ? Math.round((bCollected / bExpected) * 100) : 0;
-
-            const tr = document.createElement('tr');
-            tr.innerHTML = `
-                <td><strong>Block ${block}</strong></td>
-                <td>${bFlats}</td>
-                <td style="color:var(--success); font-weight:bold;">₹${bCollected.toLocaleString('en-IN')}</td>
-                <td style="color:var(--danger);">₹${bPending.toLocaleString('en-IN')}</td>
-                <td><strong>${bRate}%</strong></td>
-            `;
-            summaryBody.appendChild(tr);
         });
 
         let totalPending = Math.max(0, totalExpected - totalCollected);
@@ -672,7 +646,98 @@
         document.getElementById('kpiRate').innerText = overallRate + '%';
     }
 
-    // Slicer Initialization & Management
+    // Admin Panel Summary Table with Monthly / FY toggle and Paid/Unpaid filters
+    function renderAdminSummary() {
+        const viewMode = document.getElementById('adminViewMode').value; // 'fy' or 'month'
+        const statusFilter = document.getElementById('adminStatusFilter').value; // 'ALL', 'PAID', 'UNPAID'
+        const theadRow = document.getElementById('adminTableHeadRow');
+        const tbody = document.getElementById('blockSummaryBody');
+
+        tbody.innerHTML = '';
+
+        // Extract columns based on viewMode
+        let columns = [];
+        if (viewMode === 'fy') {
+            columns = ["FY 2025-26", "FY 2026-27"];
+            theadRow.innerHTML = `
+                <th>Block</th>
+                <th>Total Flats</th>
+                <th>FY 2025-26 Collected</th>
+                <th>FY 2026-27 Collected</th>
+                <th>Total Collected</th>
+                <th>Pending</th>
+                <th>Collection %</th>
+            `;
+        } else {
+            // Month wise
+            columns = monthsDef.map(m => m.month);
+            let thHTML = `<th>Block</th><th>Total Flats</th>`;
+            columns.forEach(c => thHTML += `<th>${c}</th>`);
+            thHTML += `<th>Total Collected</th>`;
+            theadRow.innerHTML = thHTML;
+        }
+
+        Object.keys(townshipData).sort().forEach(block => {
+            let bFlats = Object.keys(townshipData[block]).length;
+            let tr = document.createElement('tr');
+            let rowHTML = `<td><strong>Block ${block}</strong></td><td>${bFlats}</td>`;
+            
+            let blockTotalCollected = 0;
+
+            if (viewMode === 'fy') {
+                let fy1Coll = 0, fy2Coll = 0;
+                Object.keys(townshipData[block]).forEach(flat => {
+                    townshipData[block][flat].months.forEach(m => {
+                        let matchStatus = (statusFilter === 'ALL') || 
+                                          (statusFilter === 'PAID' && m.amount > 0) || 
+                                          (statusFilter === 'UNPAID' && m.amount === 0);
+                        if (matchStatus) {
+                            if (m.fy === "FY 2025-26" && m.amount > 0) fy1Coll += m.amount;
+                            if (m.fy === "FY 2026-27" && m.amount > 0) fy2Coll += m.amount;
+                        }
+                    });
+                });
+                blockTotalCollected = fy1Coll + fy2Coll;
+                let pendingAmt = Math.max(0, (bFlats * 2000 * 20) - blockTotalCollected);
+                let rate = Math.round((blockTotalCollected / (blockTotalCollected + pendingAmt || 1)) * 100);
+
+                rowHTML += `
+                    <td style="color:var(--success);">₹${fy1Coll.toLocaleString('en-IN')}</td>
+                    <td style="color:var(--success);">₹${fy2Coll.toLocaleString('en-IN')}</td>
+                    <td style="font-weight:bold;">₹${blockTotalCollected.toLocaleString('en-IN')}</td>
+                    <td style="color:var(--danger);">₹${pendingAmt.toLocaleString('en-IN')}</td>
+                    <td><strong>${rate}%</strong></td>
+                `;
+            } else {
+                let monthTotals = {};
+                columns.forEach(c => monthTotals[c] = 0);
+
+                Object.keys(townshipData[block]).forEach(flat => {
+                    townshipData[block][flat].months.forEach(m => {
+                        if (columns.includes(m.month)) {
+                            let matchStatus = (statusFilter === 'ALL') || 
+                                              (statusFilter === 'PAID' && m.amount > 0) || 
+                                              (statusFilter === 'UNPAID' && m.amount === 0);
+                            if (matchStatus && m.amount > 0) {
+                                monthTotals[m.month] += m.amount;
+                                blockTotalCollected += m.amount;
+                            }
+                        }
+                    });
+                });
+
+                columns.forEach(c => {
+                    rowHTML += `<td>₹${monthTotals[c].toLocaleString('en-IN')}</td>`;
+                });
+                rowHTML += `<td style="font-weight:bold; color:var(--success);">₹${blockTotalCollected.toLocaleString('en-IN')}</td>`;
+            }
+
+            tr.innerHTML = rowHTML;
+            tbody.appendChild(tr);
+        });
+    }
+
+    // Slicers Initialization
     function initSlicers() {
         const fys = new Set();
         const blocks = Object.keys(townshipData).sort();
@@ -687,21 +752,18 @@
             });
         });
 
-        // Render FY Slicer
         const fyBox = document.getElementById('fySlicerContainer');
         fyBox.innerHTML = `<label><input type="checkbox" value="ALL" checked onchange="toggleAllGroup('fySlicerContainer', this)"> Select All FYs</label>`;
         Array.from(fys).sort().forEach(fy => {
             fyBox.innerHTML += `<label><input type="checkbox" value="${fy}" checked onchange="updateGroupSelectAll('fySlicerContainer')"> ${fy}</label>`;
         });
 
-        // Render Block Slicer
         const blockBox = document.getElementById('blockSlicerContainer');
         blockBox.innerHTML = `<label><input type="checkbox" value="ALL" checked onchange="toggleAllGroup('blockSlicerContainer', this)"> Select All Blocks</label>`;
         blocks.forEach(b => {
             blockBox.innerHTML += `<label><input type="checkbox" value="${b}" checked onchange="updateGroupSelectAll('blockSlicerContainer'); updateFlatSlicer();"> Block ${b}</label>`;
         });
 
-        // Render Month Slicer
         const monthBox = document.getElementById('monthSlicerContainer');
         monthBox.innerHTML = `<label><input type="checkbox" value="ALL" checked onchange="toggleAllGroup('monthSlicerContainer', this)"> Select All Months</label>`;
         Array.from(months).forEach(m => {
@@ -721,7 +783,7 @@
         selectedBlocks.forEach(b => {
             if (townshipData[b]) {
                 Object.keys(townshipData[b]).sort().forEach(f => {
-                    flatBox.innerHTML += `<label><input type="checkbox" value="${b}-${f}" checked onchange="updateGroupSelectAll('flatSlicerContainer')"> Block ${b} - Flat ${f}</label>`;
+                    flatBox.innerHTML += `<label><input type="checkbox" value="${b}-${f}" checked onchange="updateGroupSelectAll('flatSlicerContainer')"> ${townshipData[b][f].name}</label>`;
                 });
             }
         });
@@ -746,7 +808,7 @@
         applySlicers();
     }
 
-    // Apply Slicers and Render Advanced Trend Dashboard (Line Chart with distinct block/flat colors)
+    // Apply Slicers and Render Advanced Line Chart with distinct block/flat mapping
     function applySlicers() {
         const selectedFYs = Array.from(document.querySelectorAll('#fySlicerContainer input:not([value="ALL"])')).filter(cb => cb.checked).map(cb => cb.value);
         const selectedBlocks = Array.from(document.querySelectorAll('#blockSlicerContainer input:not([value="ALL"])')).filter(cb => cb.checked).map(cb => cb.value);
@@ -756,8 +818,6 @@
         let filteredReceived = 0;
         let filteredPending = 0;
         
-        // Multi-series dataset collection for Line Chart
-        // We will build datasets based on whether multiple blocks or specific flats are selected.
         let monthLabels = [];
         monthsDef.forEach(m => {
             if (selectedFYs.includes(m.fy) && selectedMonths.includes(m.month)) {
@@ -765,7 +825,6 @@
             }
         });
 
-        // Let's compute overall and block-wise series
         let blockSeriesData = {};
         selectedBlocks.forEach(b => {
             blockSeriesData[b] = {};
