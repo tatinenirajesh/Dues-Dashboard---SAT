@@ -19,6 +19,26 @@ select[multiple]{height:118px}.actions{display:flex;gap:8px;flex-wrap:wrap;align
 .table-wrap{overflow:auto;border:1px solid var(--line);border-radius:8px}table{border-collapse:collapse;width:100%;min-width:760px}th,td{padding:10px 11px;text-align:left;border-bottom:1px solid var(--line);font-size:12px;white-space:nowrap}th{background:#f0f4fa;color:#53647e;text-transform:uppercase;font-size:10px;letter-spacing:.04em;position:sticky;top:0}tbody tr:hover{background:#f8fbff}.badge{display:inline-block;border-radius:20px;padding:3px 8px;font-size:10px;font-weight:700}.paid{color:#087443;background:#d9f8e8}.unpaid{color:#b42332;background:#ffe3e5}.partial{color:#8a5a00;background:#fff0c2}
 .section-title{font-size:16px;margin:0 0 5px}.sub{color:var(--muted);font-size:12px;margin:0 0 13px}.muted{color:var(--muted)}.right{margin-left:auto}.hidden{display:none!important}.summary-strip{display:flex;gap:15px;flex-wrap:wrap;color:var(--muted);font-size:12px;margin:8px 0 12px}.summary-strip b{color:var(--text)}.chartbox{height:390px;position:relative;margin-top:12px}.notice{padding:10px 12px;border-radius:7px;background:#eef5ff;color:#294b85;border:1px solid #d6e5ff;font-size:12px;margin-bottom:14px}
 .filter-grid{display:grid;grid-template-columns:repeat(4,minmax(180px,1fr));gap:12px}.filterbox{border:1px solid var(--line);border-radius:8px;background:#fff;padding:8px;height:155px;overflow:auto}.filterbox label{display:flex;gap:7px;align-items:center;font-size:12px;margin:5px 0;cursor:pointer}.filterbox input{accent-color:var(--blue)}.filter-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:5px}.filter-head button{border:0;background:none;color:var(--blue);font-size:11px;cursor:pointer}
+.filter-dropdown{position:relative;min-width:0}
+.filter-dropdown details{position:relative}
+.filter-dropdown summary{list-style:none;display:flex;justify-content:space-between;align-items:center;gap:10px;padding:11px 12px;border:1px solid var(--line);border-radius:8px;background:#fff;color:#24364f;font-weight:600;cursor:pointer}
+.filter-dropdown summary::-webkit-details-marker{display:none}
+.filter-dropdown summary:after{content:"⌄";font-size:16px;color:var(--muted)}
+.filter-dropdown details[open] summary{border-color:var(--blue);border-bottom-left-radius:0;border-bottom-right-radius:0}
+.filter-dropdown summary small{margin-left:auto;color:var(--muted);font-weight:400;font-size:11px}
+.filter-dropdown-menu{position:absolute;top:100%;left:0;right:0;z-index:30;background:#fff;border:1px solid var(--blue);border-top:0;border-radius:0 0 8px 8px;padding:8px;box-shadow:0 8px 20px #10264b20}
+.filter-dropdown .filterbox{height:190px;border:0;padding:2px;overflow:auto}
+.filter-dropdown .filter-head{margin:0 0 6px;padding-bottom:5px;border-bottom:1px solid var(--line)}
+.filter-dropdown .filter-head button{font-size:11px}
+.analytics-kpis{grid-template-columns:repeat(3,minmax(0,1fr))}
+.table-heading{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:10px}
+.table-heading .section-title{margin:0}
+th.sortable{cursor:pointer;user-select:none}
+th.sortable:after{content:" ↕";color:#8b98aa;font-size:10px}
+th.sortable[data-sort-direction="asc"]:after{content:" ↑";color:var(--blue)}
+th.sortable[data-sort-direction="desc"]:after{content:" ↓";color:var(--blue)}
+@media print{th.sortable:after{content:""!important}}
+
 @media(max-width:850px){.grid,.filter-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.kpis{grid-template-columns:repeat(2,minmax(0,1fr))}.chartbox{height:320px}}
 @media(max-width:520px){.container{padding:0 10px}.grid,.filter-grid{grid-template-columns:1fr}.kpis{grid-template-columns:repeat(2,minmax(0,1fr))}.kpi strong{font-size:19px}.card{padding:12px}.tab{padding:9px 11px;font-size:12px}}
 </style></head>
@@ -26,58 +46,57 @@ select[multiple]{height:118px}.actions{display:flex;gap:8px;flex-wrap:wrap;align
 <header><h1>Sri Anjaneya Township</h1><p>Maintenance Dues &amp; Advanced Analytics Portal · 198 Flats Master</p></header>
 <main class="container">
 <nav class="tabs">
-<button class="tab active" data-tab="ledger">Flat Ledger Lookup</button>
-<button class="tab" data-tab="admin">Admin Summary &amp; Excel Sync</button>
-<button class="tab" data-tab="analytics">Advanced Trend Dashboard</button>
+<button class="tab active" data-tab="ledger">Flat Ledger</button>
+<button class="tab" data-tab="admin">Summary</button>
+<button class="tab" data-tab="analytics">Analytics Dashboard</button>
 </nav>
 <section id="ledger" class="panel active">
 <div class="card">
-<h2 class="section-title">Ledger Filters</h2><p class="sub">Select one or more blocks, flats, financial years, months and payment statuses. All selections are multi-select.</p>
+<h2 class="section-title">Flat Ledger Filters</h2><p class="sub">Select one or more blocks, flats, financial years, months and payment statuses. All selections are multi-select.</p>
 <div class="grid">
 <div class="field"><label for="lBlocks">Blocks</label><select id="lBlocks" multiple></select></div>
 <div class="field"><label for="lFlats">Flats</label><select id="lFlats" multiple></select></div>
 <div class="field"><label for="lFY">Financial Years</label><select id="lFY" multiple></select></div>
 <div class="field"><label for="lMonths">Months</label><select id="lMonths" multiple></select></div>
 <div class="field"><label for="lStatus">Payment Status</label><select id="lStatus" multiple><option value="PAID" selected>Paid</option><option value="UNPAID" selected>Unpaid</option></select></div>
-</div><div class="actions" style="margin-top:12px"><button class="btn" onclick="renderLedger()">Apply Filters</button><button class="btn secondary" onclick="resetLedgerFilters()">Reset</button><button class="btn secondary right" onclick="exportLedger()">Export Ledger</button></div>
+</div><div class="actions" style="margin-top:12px"><button class="btn" onclick="renderLedger()">Apply Filters</button><button class="btn secondary" onclick="resetLedgerFilters()">Reset</button><button class="btn secondary right" onclick="exportTableExcel('ledgerTable','SAT_Flat_Ledger.xlsx','Flat Ledger')">Export Excel</button><button class="btn secondary" onclick="exportTablePDF('ledgerTable','Sri Anjaneya Township - Flat Ledger')">Export PDF</button></div>
 </div>
 <div class="kpis">
-<div class="kpi"><small>Selected flats</small><strong id="lFlatCount">198</strong></div><div class="kpi"><small>Received</small><strong class="green" id="lReceived">₹0</strong></div><div class="kpi"><small>Pending</small><strong class="red" id="lPending">₹0</strong></div><div class="kpi"><small>Paid / Unpaid months</small><strong id="lPaidUnpaid">0 / 0</strong></div>
+<div class="kpi"><small>Total Flats</small><strong id="lFlatCount">198</strong></div><div class="kpi"><small>Received</small><strong class="green" id="lReceived">₹0</strong></div><div class="kpi"><small>Pending</small><strong class="red" id="lPending">₹0</strong></div><div class="kpi"><small>Paid Flats / Unpaid Flats</small><strong id="lPaidUnpaid">0 / 0</strong></div>
 </div>
-<div class="card"><h2 class="section-title">Flat-wise Maintenance Ledger</h2><div class="summary-strip" id="ledgerSummary"></div><div class="table-wrap"><table><thead><tr><th>Block</th><th>Flat</th><th>Resident</th><th>Financial Year</th><th>Month</th><th>RT No.</th><th>Default Fee</th><th>Amount Paid</th><th>Pending</th><th>Status</th></tr></thead><tbody id="ledgerBody"></tbody></table></div></div>
+<div class="card"><h2 class="section-title">Flat Ledger</h2><div class="summary-strip" id="ledgerSummary"></div><div class="table-wrap"><table id="ledgerTable"><thead><tr><th>Block</th><th>Flat</th><th>Resident</th><th>Financial Year</th><th>Month</th><th>RT No.</th><th>Default Fee</th><th>Amount Paid</th><th>Pending</th><th>Status</th></tr></thead><tbody id="ledgerBody"></tbody></table></div></div>
 </section>
 <section id="admin" class="panel">
 <div class="kpis">
 <div class="kpi"><small>Total flats</small><strong id="aFlats">198</strong></div><div class="kpi"><small>Total receivable</small><strong id="aReceivable">₹0</strong></div><div class="kpi"><small>Total received</small><strong class="green" id="aReceived">₹0</strong></div><div class="kpi"><small>Collection rate</small><strong class="blue" id="aRate">0%</strong></div>
 </div>
 <div class="card">
-<h2 class="section-title">Block-wise Collection Summary</h2><p class="sub">FY view covers months due through the current month. Future months are excluded from FY totals. Month view shows the selected month only. Paid Flats are shown as Any Payment / Fully Paid.</p>
+<h2 class="section-title">Summary</h2><p class="sub">FY view covers months due through the current month. Future months are excluded from FY totals. Month view shows the selected month only. Paid Flats counts each flat once when at least one receipt exists in the selected period.</p>
 <div class="grid">
 <div class="field"><label for="aMode">View</label><select id="aMode"><option value="FY">Financial Year</option><option value="MONTH">Month</option></select></div>
 <div class="field"><label for="aFY">Financial Year</label><select id="aFY"></select></div>
 <div class="field" id="aMonthWrap"><label for="aMonth">Month</label><select id="aMonth"></select></div>
 </div>
-<div class="actions" style="margin:12px 0"><button class="btn" onclick="renderAdmin()">Apply</button><button class="btn secondary" onclick="exportAdmin()">Export Summary</button><label class="btn secondary" for="excelFile">Import Excel Workbook</label><input id="excelFile" type="file" accept=".xlsx,.xls,.xlsm" class="hidden"></div>
-<div class="notice" id="importStatus">Dashboard is loaded with the uploaded FY 2026-27 workbook. Importing another workbook replaces the current dataset after validation.</div>
-<div class="table-wrap"><table><thead><tr><th>Block</th><th>Total Flats</th><th>Paid Flats (Any / Full)</th><th>Total Receivable</th><th>Total Received</th><th>Collection %</th></tr></thead><tbody id="adminBody"></tbody><tfoot id="adminFoot"></tfoot></table></div>
+<div class="actions" style="margin:12px 0"><button class="btn" onclick="renderAdmin()">Apply</button><button class="btn secondary" onclick="exportTableExcel('adminTable','SAT_Summary.xlsx','Summary')">Export Excel</button><button class="btn secondary" onclick="exportTablePDF('adminTable','Sri Anjaneya Township - Summary')">Export PDF</button></div>
+<div class="table-wrap"><table id="adminTable"><thead><tr><th>Block</th><th>Total Flats</th><th>Paid Flats</th><th>Total Receivable</th><th>Total Received</th><th>Collection %</th></tr></thead><tbody id="adminBody"></tbody><tfoot id="adminFoot"></tfoot></table></div>
 </div>
 </section>
 <section id="analytics" class="panel">
 <div class="card">
-<h2 class="section-title">Interactive Analytics Filters</h2><p class="sub">Use multi-select filters to compare collection trends by block or individual flats.</p>
-<div class="filter-grid">
-<div><div class="filter-head"><span class="filter-title">Financial Years</span><button onclick="setAll('xFY',true)">Select all</button><button onclick="setAll('xFY',false)">Unselect all</button></div><div class="filterbox" id="xFY"></div></div>
-<div><div class="filter-head"><span class="filter-title">Blocks</span><button onclick="setAll('xBlocks',true)">Select all</button><button onclick="setAll('xBlocks',false)">Unselect all</button></div><div class="filterbox" id="xBlocks"></div></div>
-<div><div class="filter-head"><span class="filter-title">Months</span><button onclick="setAll('xMonths',true)">Select all</button><button onclick="setAll('xMonths',false)">Unselect all</button></div><div class="filterbox" id="xMonths"></div></div>
-<div><div class="filter-head"><span class="filter-title">Flats</span><button onclick="setAll('xFlats',true)">Select all</button><button onclick="setAll('xFlats',false)">Unselect all</button></div><div class="filterbox" id="xFlats"></div></div>
+<h2 class="section-title">Analytics Dashboard Filters</h2><p class="sub">Use dropdown filters to compare collection trends by financial year, month, block or individual flat.</p>
+<div class="filter-grid dropdown-grid">
+<div class="filter-dropdown"><details><summary><span>Financial Years</span><small id="xFYCount">1 selected</small></summary><div class="filter-dropdown-menu"><div class="filter-head"><button onclick="setAll('xFY',true)">Select all</button><button onclick="setAll('xFY',false)">Unselect all</button></div><div class="filterbox" id="xFY"></div></div></details></div>
+<div class="filter-dropdown"><details><summary><span>Blocks</span><small id="xBlocksCount">5 selected</small></summary><div class="filter-dropdown-menu"><div class="filter-head"><button onclick="setAll('xBlocks',true)">Select all</button><button onclick="setAll('xBlocks',false)">Unselect all</button></div><div class="filterbox" id="xBlocks"></div></div></details></div>
+<div class="filter-dropdown"><details><summary><span>Months</span><small id="xMonthsCount">12 selected</small></summary><div class="filter-dropdown-menu"><div class="filter-head"><button onclick="setAll('xMonths',true)">Select all</button><button onclick="setAll('xMonths',false)">Unselect all</button></div><div class="filterbox" id="xMonths"></div></div></details></div>
+<div class="filter-dropdown"><details><summary><span>Flats</span><small id="xFlatsCount">198 selected</small></summary><div class="filter-dropdown-menu"><div class="filter-head"><button onclick="setAll('xFlats',true)">Select all</button><button onclick="setAll('xFlats',false)">Unselect all</button></div><div class="filterbox" id="xFlats"></div></div></details></div>
 </div>
 <div class="actions" style="margin-top:12px"><button class="btn" onclick="renderAnalytics()">Apply Filters</button><button class="btn secondary" onclick="resetAnalytics()">Reset All</button><div class="field right" style="min-width:190px"><label for="xSeries">Chart grouping</label><select id="xSeries"><option value="BLOCK">Block-wise collections</option><option value="FLAT">Flat-wise collections</option><option value="TOTAL">Overall collections</option></select></div></div>
 </div>
-<div class="kpis">
-<div class="kpi"><small>Filtered receivable</small><strong id="xReceivable">₹0</strong></div><div class="kpi"><small>Filtered received</small><strong class="green" id="xReceived">₹0</strong></div><div class="kpi"><small>Filtered pending</small><strong class="red" id="xPending">₹0</strong></div><div class="kpi"><small>Collection rate</small><strong class="blue" id="xRate">0%</strong></div>
+<div class="kpis analytics-kpis">
+<div class="kpi"><small>Receivable</small><strong id="xReceivable">₹0</strong></div><div class="kpi"><small>Received</small><strong class="green" id="xReceived">₹0</strong></div><div class="kpi"><small>Pending</small><strong class="red" id="xPending">₹0</strong></div>
 </div>
 <div class="notice" id="analyticsScope">Analytics period and filter scope</div><div class="card"><h2 class="section-title">Maintenance Collection Trend</h2><p class="sub">Monthly actual receipts across selected months, including any advance entries. KPI and detail totals count months due through the current month.</p><div class="chartbox"><canvas id="trendChart"></canvas></div></div>
-<div class="card"><h2 class="section-title">Block-wise / Flat-wise Collection Detail</h2><div class="table-wrap"><table><thead><tr><th>Block</th><th>Flat</th><th>Resident</th><th>Receivable</th><th>Received</th><th>Pending</th><th>Collection %</th><th>Paid Months</th><th>Unpaid Months</th></tr></thead><tbody id="analyticsBody"></tbody></table></div></div>
+<div class="card"><div class="row table-heading"><h2 class="section-title">Analytics Dashboard Details</h2><div class="actions"><button class="btn secondary" onclick="exportTableExcel('analyticsTable','SAT_Analytics_Details.xlsx','Analytics')">Export Excel</button><button class="btn secondary" onclick="exportTablePDF('analyticsTable','Sri Anjaneya Township - Analytics Dashboard')">Export PDF</button></div></div><div class="table-wrap"><table id="analyticsTable"><thead><tr><th>Block</th><th>Flat</th><th>Resident</th><th>Receivable</th><th>Received</th><th>Pending</th><th>Collection %</th><th>Paid Months</th><th>Unpaid Months</th></tr></thead><tbody id="analyticsBody"></tbody></table></div></div>
 </section>
 </main>
 <script>
@@ -101,18 +120,24 @@ function initFilters(){
  addChecks('xFY',fyList());addChecks('xBlocks',blocks.map(b=>'Block '+b),blocks);addChecks('xMonths',monthList().map(fmtMonthKey));addChecks('xFlats',data.map(r=>r.block+'-'+r.flat+' | '+(r.name||'Name not available')).sort(),data.map(r=>flatKey(r)));
  document.getElementById('lBlocks').addEventListener('change',updateLedgerFlatOptions);
  document.getElementById('aMode').addEventListener('change',()=>{document.getElementById('aMonthWrap').classList.toggle('hidden',document.getElementById('aMode').value==='FY');renderAdmin()});
- document.getElementById('excelFile').addEventListener('change',importWorkbook);
  document.getElementById('xSeries').addEventListener('change',renderAnalytics);
- updateLedgerFlatOptions();refreshCrossFilters();renderLedger();renderAdmin();renderAnalytics();
+ updateLedgerFlatOptions();refreshCrossFilters();renderLedger();renderAdmin();renderAnalytics();initTableSorting();
 }
 function addChecks(id,items,values){
  const box=document.getElementById(id);box.innerHTML='';
  items.forEach((label,i)=>{const val=values?values[i]:label;const wrap=document.createElement('label');const cb=document.createElement('input');cb.type='checkbox';cb.value=val;cb.checked=true;wrap.append(cb,document.createTextNode(label));box.appendChild(wrap)});
 }
-function setAll(id,on){document.querySelectorAll('#'+id+' input').forEach(x=>x.checked=on);refreshCrossFilters(id);renderAnalytics()}
+function setAll(id,on){document.querySelectorAll('#'+id+' input:not(:disabled)').forEach(x=>x.checked=on);refreshCrossFilters(id);renderAnalytics()}
 function checked(id){return [...document.querySelectorAll('#'+id+' input:checked')].map(x=>x.value)}
 function filterSnapshot(){
  return {fys:checked('xFY'),blocks:checked('xBlocks'),months:checked('xMonths'),flats:checked('xFlats')};
+}
+function updateDropdownCounts(){
+ ['xFY','xBlocks','xMonths','xFlats'].forEach(id=>{
+  const all=[...document.querySelectorAll('#'+id+' input')],selectedCount=all.filter(x=>x.checked).length;
+  const label=selectedCount===all.length?'All selected':selectedCount===0?'None selected':selectedCount+' selected';
+  const target=document.getElementById(id+'Count');if(target)target.textContent=label;
+ });
 }
 function refreshCrossFilters(changedId){
  const s=filterSnapshot();
@@ -138,15 +163,17 @@ function refreshCrossFilters(changedId){
    const ma=data.flatMap(r=>r.months).find(m=>m.month===a),mb=data.flatMap(r=>r.months).find(m=>m.month===b);return ma.monthKey.localeCompare(mb.monthKey)
   });
   if(id==='xFlats') allowed=uniq(candidates.map(flatKey)).sort();
-  const allowedSet=new Set(allowed), prior=new Set(s[id==='xFY'?'fys':id==='xBlocks'?'blocks':id==='xMonths'?'months':'flats']);
+  const allowedSet=new Set(allowed),prior=new Set(s[id==='xFY'?'fys':id==='xBlocks'?'blocks':id==='xMonths'?'months':'flats']);
   const box=document.getElementById(id);box.innerHTML='';
   allVals[id].forEach(v=>{
    const label=id==='xBlocks'?'Block '+v:id==='xFlats'?v+' | '+((data.find(r=>flatKey(r)===v)||{}).name||'Name not available'):v;
-   const wrap=document.createElement('label'),cb=document.createElement('input');cb.type='checkbox';cb.value=v;cb.checked=prior.has(v);cb.disabled=!allowedSet.has(v);
+   const wrap=document.createElement('label'),cb=document.createElement('input');
+   cb.type='checkbox';cb.value=v;cb.checked=prior.has(v)&&allowedSet.has(v);cb.disabled=!allowedSet.has(v);
    cb.addEventListener('change',()=>{refreshCrossFilters(id);renderAnalytics()});
    wrap.append(cb,document.createTextNode(label));if(!allowedSet.has(v))wrap.style.opacity='.45';box.appendChild(wrap);
   });
  });
+ updateDropdownCounts();
 }
 function updateLedgerFlatOptions(){
  const blocks=selected('lBlocks');const flats=data.filter(r=>blocks.includes(r.block)).map(flatKey).sort();
@@ -164,13 +191,28 @@ function ledgerRows(){
 }
 function renderLedger(){
  const rows=ledgerRows(),body=document.getElementById('ledgerBody');body.innerHTML='';
- let received=0,pending=0,paid=0,unpaid=0;const flats=new Set();
- rows.forEach(({r,m,paid:p,amount,pending:due})=>{flats.add(flatKey(r));received+=amount;pending+=due;p?paid++:unpaid++;
-  const tr=document.createElement('tr');tr.innerHTML=`<td>Block ${r.block}</td><td>${r.flat}</td><td>${esc(r.name||'Name not available')}</td><td>${m.fy}</td><td>${m.month}</td><td>${m.receipt?esc(m.receipt):'—'}</td><td>${money(r.fee)}</td><td>${money(amount)}</td><td>${money(due)}</td><td><span class="badge ${p?'paid':'unpaid'}">${p?'PAID':'UNPAID'}</span></td>`;body.appendChild(tr);
+ let received=0,pending=0;const blockSet=new Set(selected('lBlocks')),flatSet=new Set(selected('lFlats'));
+ const selectedRecords=data.filter(r=>blockSet.has(r.block)&&flatSet.has(flatKey(r)));
+ const fys=selected('lFY'),months=selected('lMonths');
+ let paidFlats=0;
+ selectedRecords.forEach(r=>{
+  const hasPayment=r.months.some(m=>fys.includes(m.fy)&&months.includes(m.month)&&!!m.receipt);
+  if(hasPayment)paidFlats++;
  });
- document.getElementById('lFlatCount').textContent=flats.size;document.getElementById('lReceived').textContent=money(received);document.getElementById('lPending').textContent=money(pending);document.getElementById('lPaidUnpaid').textContent=paid+' / '+unpaid;
- document.getElementById('ledgerSummary').innerHTML=`<span>Ledger rows: <b>${rows.length.toLocaleString('en-IN')}</b></span><span>Flats represented: <b>${flats.size}</b></span><span>Paid months: <b>${paid}</b></span><span>Unpaid months: <b>${unpaid}</b></span>`;
+ rows.forEach(({r,m,paid:p,amount,pending:due})=>{
+  received+=amount;pending+=due;
+  const tr=document.createElement('tr');
+  tr.innerHTML=`<td>Block ${r.block}</td><td>${r.flat}</td><td>${esc(r.name||'Name not available')}</td><td>${m.fy}</td><td>${m.month}</td><td>${m.receipt?esc(m.receipt):'—'}</td><td>${money(r.fee)}</td><td>${money(amount)}</td><td>${money(due)}</td><td><span class="badge ${p?'paid':'unpaid'}">${p?'PAID':'UNPAID'}</span></td>`;
+  body.appendChild(tr);
+ });
+ const totalFlats=selectedRecords.length,unpaidFlats=Math.max(0,totalFlats-paidFlats);
+ document.getElementById('lFlatCount').textContent=totalFlats;
+ document.getElementById('lReceived').textContent=money(received);
+ document.getElementById('lPending').textContent=money(pending);
+ document.getElementById('lPaidUnpaid').textContent=paidFlats+' / '+unpaidFlats;
+ document.getElementById('ledgerSummary').innerHTML=`<span>Ledger rows: <b>${rows.length.toLocaleString('en-IN')}</b></span><span>Total flats in selection: <b>${totalFlats}</b></span><span>Paid flats: <b>${paidFlats}</b></span><span>Unpaid flats: <b>${unpaidFlats}</b></span>`;
  if(!rows.length)body.innerHTML='<tr><td colspan="10" class="muted">No records match the selected filters.</td></tr>';
+ resetTableSort('ledgerTable');
 }
 function currentMonthKey(){const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')}
 function periodMonths(mode,fy,month){const found=data.flatMap(r=>r.months).filter(m=>m.fy===fy&&(mode==='FY'?m.monthKey<=currentMonthKey():m.month===month));const byKey=new Map(found.map(m=>[m.monthKey,m]));return [...byKey.values()].sort((a,b)=>a.monthKey.localeCompare(b.monthKey))}
@@ -192,12 +234,13 @@ function renderAdmin(){
  const body=document.getElementById('adminBody');body.innerHTML='';
  rows.forEach(x=>{
   const tr=document.createElement('tr');
-  tr.innerHTML=`<td><b>Block ${x.block}</b></td><td>${x.flats}</td><td>${x.paidAny} / ${x.full}</td><td>${money(x.rec)}</td><td class="green">${money(x.got)}</td><td>${x.rate.toFixed(1)}%</td>`;
+  tr.innerHTML=`<td><b>Block ${x.block}</b></td><td>${x.flats}</td><td>${x.paidAny}</td><td>${money(x.rec)}</td><td class="green">${money(x.got)}</td><td>${x.rate.toFixed(1)}%</td>`;
   body.appendChild(tr);
  });
- document.getElementById('adminFoot').innerHTML=`<tr><th>Total</th><th>${data.length}</th><th>${total.paidAny} / ${total.full}</th><th>${money(total.rec)}</th><th>${money(total.got)}</th><th>${total.rate.toFixed(1)}%</th></tr>`;
+ document.getElementById('adminFoot').innerHTML=`<tr><th>Total</th><th>${data.length}</th><th>${total.paidAny}</th><th>${money(total.rec)}</th><th>${money(total.got)}</th><th>${total.rate.toFixed(1)}%</th></tr>`;
  const subtitle=document.querySelector('#admin .sub');
- if(subtitle)subtitle.textContent=`Reporting period: ${periodLabel}. Paid Flats column = paid at least once / fully paid for the selected period.`;
+ if(subtitle)subtitle.textContent=`Reporting period: ${periodLabel}. Paid Flats counts each flat once when at least one receipt exists in the selected period.`;
+ resetTableSort('adminTable');
 }
 function analyticsSelection(){
  const fys=checked('xFY'),blocks=checked('xBlocks'),months=checked('xMonths'),flats=checked('xFlats');
@@ -210,59 +253,96 @@ function analyticsSelection(){
 function renderAnalytics(){
  const {recs,selectedMonths,dueMonths,fys,blocks,months}=analyticsSelection();let rec=0,got=0;
  recs.forEach(r=>dueMonths.forEach(k=>{const m=r.months.find(x=>x.monthKey===k);rec+=r.fee;if(m&&m.receipt)got+=m.amount||0}));
- const pending=Math.max(0,rec-got),rate=rec?got/rec*100:0;
+ const pending=Math.max(0,rec-got);
  document.getElementById('analyticsScope').textContent=`Scope: ${fys.length?fys.join(', '):'No FY selected'} | ${blocks.length?blocks.map(b=>'Block '+b).join(', '):'No blocks selected'} | ${dueMonths.length} due months / ${selectedMonths.length} chart months | ${recs.length} flats. KPIs and detail totals use the same due-to-date calculation as Admin Summary; chart shows actual receipts in selected months.`;
- document.getElementById('xReceivable').textContent=money(rec);document.getElementById('xReceived').textContent=money(got);document.getElementById('xPending').textContent=money(pending);document.getElementById('xRate').textContent=rate.toFixed(1)+'%';
+ document.getElementById('xReceivable').textContent=money(rec);document.getElementById('xReceived').textContent=money(got);document.getElementById('xPending').textContent=money(pending);
  const seriesMode=document.getElementById('xSeries').value, labels=selectedMonths.map(k=>{const m=recs.flatMap(r=>r.months).find(x=>x.monthKey===k);return m?m.month:k});
  const groups=seriesMode==='TOTAL'?['Overall']:seriesMode==='BLOCK'?uniq(recs.map(r=>r.block)).sort():recs.map(flatKey);
  const colors=['#2563eb','#16a34a','#d97706','#9333ea','#dc2626','#0891b2','#a16207','#be185d'];
  const datasets=groups.map((g,i)=>({label:seriesMode==='TOTAL'?g:seriesMode==='BLOCK'?'Block '+g:g,data:selectedMonths.map(k=>recs.filter(r=>seriesMode==='TOTAL'||(seriesMode==='BLOCK'?r.block===g:flatKey(r)===g)).reduce((s,r)=>{const m=r.months.find(x=>x.monthKey===k);return s+(m&&m.receipt?(m.amount||0):0)},0)),borderColor:colors[i%colors.length],backgroundColor:colors[i%colors.length],borderWidth:2,pointRadius:3,tension:.22}));
  if(chart)chart.destroy();chart=new Chart(document.getElementById('trendChart'),{type:'line',data:{labels,datasets},options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},plugins:{legend:{position:'bottom'}},scales:{y:{beginAtZero:true,ticks:{callback:v=>'₹'+Number(v).toLocaleString('en-IN')}}}}});
  const body=document.getElementById('analyticsBody');body.innerHTML='';
- recs.forEach(r=>{let rr=0,gg=0,pm=0;dueMonths.forEach(k=>{rr+=r.fee;const m=r.months.find(x=>x.monthKey===k);if(m&&m.receipt){gg+=m.amount||0;pm++}});const pend=Math.max(0,rr-gg);const tr=document.createElement('tr');tr.innerHTML=`<td>Block ${r.block}</td><td>${r.flat}</td><td>${esc(r.name||'Name not available')}</td><td>${money(rr)}</td><td class="green">${money(gg)}</td><td class="red">${money(pend)}</td><td>${rr?(gg/rr*100).toFixed(1):'0.0'}%</td><td>${pm}</td><td>${selectedMonths.length-pm}</td>`;body.appendChild(tr)});
+ recs.forEach(r=>{let rr=0,gg=0,pm=0;dueMonths.forEach(k=>{rr+=r.fee;const m=r.months.find(x=>x.monthKey===k);if(m&&m.receipt){gg+=m.amount||0;pm++}});const pend=Math.max(0,rr-gg);const tr=document.createElement('tr');tr.innerHTML=`<td>Block ${r.block}</td><td>${r.flat}</td><td>${esc(r.name||'Name not available')}</td><td>${money(rr)}</td><td class="green">${money(gg)}</td><td class="red">${money(pend)}</td><td>${rr?(gg/rr*100).toFixed(1):'0.0'}%</td><td>${pm}</td><td>${dueMonths.length-pm}</td>`;body.appendChild(tr)});
  if(!recs.length)body.innerHTML='<tr><td colspan="9">No flats match the filters.</td></tr>';
+ resetTableSort('analyticsTable');
 }
 function resetAnalytics(){['xFY','xBlocks','xMonths','xFlats'].forEach(id=>setAll(id,true));renderAnalytics()}
 function esc(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
 function exportRows(rows,name){if(!window.XLSX){alert('Excel library is unavailable.');return}const ws=XLSX.utils.json_to_sheet(rows);const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,'Dashboard Export');XLSX.writeFile(wb,name)}
-function exportLedger(){exportRows(ledgerRows().map(({r,m,paid,amount,pending})=>({Block:r.block,Flat:r.flat,Resident:r.name,FY:m.fy,Month:m.month,Receipt:m.receipt,DefaultFee:r.fee,AmountPaid:amount,Pending:pending,Status:paid?'PAID':'UNPAID'})),'SAT_Flat_Ledger.xlsx')}
-function exportAdmin(){
- const mode=document.getElementById('aMode').value,fy=document.getElementById('aFY').value,month=document.getElementById('aMonth').value,months=periodMonths(mode,fy,month);
- const rows=BLOCKS.map(b=>{const rr=data.filter(r=>r.block===b),s=summarize(rr,months);return {Block:'Block '+b,'Total Flats':rr.length,'Paid Flats (Any Payment)':s.paidAny,'Fully Paid Flats':s.full,'Total Receivable':s.rec,'Total Received':s.got,'Collection %':Number(s.rate.toFixed(1))}});
- const total=summarize(data,months);rows.push({Block:'TOTAL','Total Flats':data.length,'Paid Flats (Any Payment)':total.paidAny,'Fully Paid Flats':total.full,'Total Receivable':total.rec,'Total Received':total.got,'Collection %':Number(total.rate.toFixed(1))});
- exportRows(rows,'SAT_Block_Summary.xlsx');
-}
-function parseMonth(label,fyHint){
- const s=String(label||'').trim().replace(/\s+/g,' ').replace(/-\s*/g,'-');
- const m=s.match(/(April|May|June|July|August|September|October|November|December|January|February|March)\s*-\s*(\d{2,4})/i);if(!m)return null;
- const mon=m[1][0].toUpperCase()+m[1].slice(1).toLowerCase(),yy=+m[2],year=yy<100?2000+yy:yy,num={April:4,May:5,June:6,July:7,August:8,September:9,October:10,November:11,December:12,January:1,February:2,March:3}[mon],start= num>=4?year:year-1;
- return {month:mon+' - '+String(year).slice(-2),monthKey:year+'-'+String(num).padStart(2,'0'),fy:'FY '+start+'-'+String(start+1).slice(-2)};
-}
-function parseWorkbook(workbook){
- const out=[];
- BLOCKS.forEach(block=>{
-  const ws=workbook.Sheets['BLOCK '+block];if(!ws)return;
-  const rows=XLSX.utils.sheet_to_json(ws,{header:1,defval:null,raw:true});
-  const headerIndex=rows.findIndex(row=>String(row[0]||'').trim().toLowerCase()==='flat no');if(headerIndex<0)return;
-  const hdr=rows[headerIndex],monthCols=[];
-  for(let c=4;c<hdr.length;c+=2){const parsed=parseMonth(hdr[c]);if(parsed)monthCols.push({col:c,meta:parsed})}
-  for(let ri=headerIndex+2;ri<rows.length;ri++){
-   const row=rows[ri],flat=row[0];if(typeof flat!=='number'||!Number.isFinite(flat)||flat<=0)continue;
-   const months=monthCols.map(x=>({ ...x.meta,receipt:row[x.col]==null?'':String(row[x.col]).trim(),amount:typeof row[x.col+1]==='number'?row[x.col+1]:Number(row[x.col+1])||0}));
-   out.push({block,flat:String(Math.trunc(flat)),fee:Number(row[1])||0,name:String(row[2]||'').trim(),months});
-  }
+
+function exportTableExcel(tableId,filename,sheetName){
+ const table=document.getElementById(tableId);
+ if(!table){alert('Table not found.');return}
+ if(!window.XLSX||!XLSX.utils.aoa_to_sheet){alert('Excel export library is unavailable.');return}
+ const matrix=[];
+ ['tHead','tBodies','tFoot'].forEach(group=>{
+  const node=group==='tBodies'?[...table.tBodies]:[table[group]].filter(Boolean);
+  node.forEach(section=>[...section.rows].forEach(row=>matrix.push([...row.cells].map(cell=>(cell.innerText||cell.textContent||'').trim()))));
  });
- if(!out.length)throw new Error('No valid flat records found. Expected sheets BLOCK A, BLOCK B, BLOCK C, BLOCK D and BLOCK F with a Flat No header.');
- return out;
+ const ws=XLSX.utils.aoa_to_sheet(matrix);
+ const wb=XLSX.utils.book_new();
+ XLSX.utils.book_append_sheet(wb,ws,(sheetName||'Dashboard').slice(0,31));
+ XLSX.writeFile(wb,filename);
 }
-async function importWorkbook(ev){
- const file=ev.target.files[0];if(!file)return;
- try{const buf=await file.arrayBuffer(),wb=XLSX.read(buf,{type:'array'}),parsed=parseWorkbook(wb);const count=parsed.length;
-  if(!confirm(`Workbook contains ${count} valid flat records from the five block sheets. Replace the current dashboard data?`))return;
-  data=parsed;initFilters();document.getElementById('importStatus').textContent=`Imported ${count} flats successfully from the five approved block sheets. DUES sheets and Overal Metrics were ignored.`;
- }catch(err){alert('Import failed: '+err.message);document.getElementById('importStatus').textContent='Import failed: '+err.message}
- finally{ev.target.value=''}
+function exportTablePDF(tableId,title){
+ const table=document.getElementById(tableId);
+ if(!table){alert('Table not found.');return}
+ const win=window.open('','_blank');
+ if(!win){alert('Allow pop-ups for this dashboard to export PDF.');return}
+ const clone=table.cloneNode(true);
+ const scope=tableId==='ledgerTable'?document.getElementById('ledgerSummary').innerText:
+             tableId==='adminTable'?document.querySelector('#admin .sub').innerText:
+             document.getElementById('analyticsScope').innerText;
+ win.document.open();
+ win.document.write(`<!DOCTYPE html><html><head><title>${esc(title)}</title><style>
+ @page{size:landscape;margin:12mm}body{font:12px Arial,sans-serif;color:#17243a;padding:12px}
+ h1{font-size:18px;margin:0 0 6px}p{font-size:10px;color:#52627a;margin:0 0 14px}
+ table{width:100%;border-collapse:collapse;font-size:9px}th,td{border:1px solid #cbd5e1;padding:6px;text-align:left;white-space:nowrap}
+ th{background:#edf2f8;font-weight:bold;text-transform:uppercase}tfoot{font-weight:bold;background:#edf2f8}
+ tr{page-break-inside:avoid}button{display:none}
+ </style></head><body><h1>${esc(title)}</h1><p>${esc(scope||'Current dashboard selection')} · Exported ${new Date().toLocaleString()}</p>${clone.outerHTML}</body></html>`);
+ win.document.close();win.focus();setTimeout(()=>win.print(),350);
 }
+function sortTable(table, column, header){
+ const body=table.tBodies[0];if(!body)return;
+ const direction=header.dataset.sortDirection==='asc'?'desc':'asc';
+ table.querySelectorAll('thead th').forEach(th=>{if(th!==header){delete th.dataset.sortDirection;th.setAttribute('aria-sort','none')}});
+ header.dataset.sortDirection=direction;header.setAttribute('aria-sort',direction==='asc'?'ascending':'descending');
+ const rows=[...body.rows];
+ const value=row=>{
+  const text=(row.cells[column]?.innerText||'').trim();
+  const month=text.match(/^(January|February|March|April|May|June|July|August|September|October|November|December)\\s*-\\s*(\\d{2,4})$/i);
+  if(month){
+   const idx={January:1,February:2,March:3,April:4,May:5,June:6,July:7,August:8,September:9,October:10,November:11,December:12}[month[1][0].toUpperCase()+month[1].slice(1).toLowerCase()];
+   return {type:'number',value:Number(month[2])<100?(2000+Number(month[2]))*100+idx:Number(month[2])*100+idx};
+  }
+  const clean=text.replace(/[₹,%\\s]/g,'').replace(/,/g,'');
+  if(clean!==''&&/^-?\\d+(\\.\\d+)?$/.test(clean))return {type:'number',value:Number(clean)};
+  return {type:'text',value:text.toLocaleLowerCase()};
+ };
+ rows.sort((a,b)=>{
+  const av=value(a),bv=value(b);let cmp;
+  if(av.type==='number'&&bv.type==='number')cmp=av.value-bv.value;
+  else cmp=String(av.value).localeCompare(String(bv.value),undefined,{numeric:true,sensitivity:'base'});
+  return direction==='asc'?cmp:-cmp;
+ });
+ rows.forEach(row=>body.appendChild(row));
+}
+function resetTableSort(tableId){
+ const table=document.getElementById(tableId);if(!table)return;
+ table.querySelectorAll('thead th').forEach(th=>{delete th.dataset.sortDirection;th.setAttribute('aria-sort','none')});
+}
+function initTableSorting(){
+ document.querySelectorAll('.table-wrap table').forEach(table=>{
+  if(table.dataset.sortReady==='1')return;
+  table.dataset.sortReady='1';
+  table.querySelectorAll('thead th').forEach((th,index)=>{
+   th.classList.add('sortable');th.title='Click to sort';
+   th.addEventListener('click',()=>sortTable(table,index,th));
+  });
+ });
+}
+
 document.querySelectorAll('.tab').forEach(btn=>btn.addEventListener('click',()=>{document.querySelectorAll('.tab').forEach(x=>x.classList.toggle('active',x===btn));document.querySelectorAll('.panel').forEach(x=>x.classList.toggle('active',x.id===btn.dataset.tab));if(btn.dataset.tab==='analytics')renderAnalytics();if(btn.dataset.tab==='admin')renderAdmin()}));
 initFilters();
 </script></body></html>
