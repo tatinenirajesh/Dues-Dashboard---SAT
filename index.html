@@ -3,228 +3,124 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sri Anjaneya Township - Dues Dashboard</title>
+    <title>Sri Anjaneya Township - Comprehensive Dues & Receipt Dashboard</title>
+    <!-- SheetJS for Excel Import/Export -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <style>
         :root {
-            --primary: #2c3e50;
-            --success: #27ae60;
-            --danger: #c0392b;
-            --bg: #f4f6f9;
+            --primary: #1e3a8a;
+            --primary-light: #3b82f6;
+            --success: #10b981;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --bg: #f8fafc;
             --card-bg: #ffffff;
-            --text: #333333;
-            --text-light: #7f8c8d;
+            --text: #1e293b;
+            --text-light: #64748b;
+            --border: #e2e8f0;
         }
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
             background-color: var(--bg);
             color: var(--text);
             margin: 0;
-            padding: 12px;
+            padding: 15px;
         }
         .container {
-            max-width: 700px;
+            max-width: 900px;
             margin: 0 auto;
         }
         header {
-            text-align: center;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: var(--card-bg);
+            padding: 15px 20px;
+            border-radius: 12px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            margin-bottom: 20px;
+        }
+        h2 { margin: 0; color: var(--primary); font-size: 1.3rem; }
+        p.subtitle { margin: 3px 0 0 0; color: var(--text-light); font-size: 0.85rem; }
+
+        /* Top Action Buttons */
+        .actions-bar {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+        .btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 8px 14px;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            cursor: pointer;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .btn:hover { background: #1e40af; }
+        .btn-success { background: var(--success); }
+        .btn-success:hover { background: #059669; }
+        .file-input { display: none; }
+
+        /* Tabs */
+        .tabs {
+            display: flex;
+            gap: 10px;
             margin-bottom: 15px;
         }
-        h2 { margin: 0 0 5px 0; color: var(--primary); font-size: 1.3rem; }
-        p.subtitle { margin: 0; color: var(--text-light); font-size: 0.85rem; }
+        .tab {
+            flex: 1;
+            padding: 10px;
+            text-align: center;
+            background: #e2e8f0;
+            border: none;
+            border-radius: 8px;
+            font-weight: bold;
+            color: var(--text-light);
+            cursor: pointer;
+            font-size: 0.9rem;
+        }
+        .tab.active {
+            background: var(--primary);
+            color: white;
+        }
+
+        /* View Panels */
+        .panel { display: none; }
+        .panel.active { display: block; }
 
         /* KPI Cards Grid */
         .kpi-grid {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
-            gap: 10px;
-            margin-bottom: 15px;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+        @media(min-width: 600px) {
+            .kpi-grid { grid-template-columns: repeat(4, 1fr); }
         }
         .kpi-card {
             background: var(--card-bg);
-            padding: 12px;
-            border-radius: 8px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
             border-left: 4px solid var(--primary);
         }
-        .kpi-card.collected { border-left-color: var(--success); }
-        .kpi-card.pending { border-left-color: var(--danger); }
+        .kpi-card.success { border-left-color: var(--success); }
+        .kpi-card.danger { border-left-color: var(--danger); }
+        .kpi-card.warning { border-left-color: var(--warning); }
         .kpi-title { font-size: 0.75rem; color: var(--text-light); text-transform: uppercase; font-weight: bold; }
-        .kpi-value { font-size: 1.15rem; font-weight: bold; color: var(--primary); margin-top: 4px; }
+        .kpi-value { font-size: 1.25rem; font-weight: bold; color: var(--primary); margin-top: 5px; }
 
-        /* Controls / Filters */
-        .controls {
-            display: flex;
-            gap: 8px;
-            margin-bottom: 15px;
-        }
-        input, select {
-            flex: 1;
-            padding: 10px;
-            border: 1px solid #cbd5e1;
-            border-radius: 6px;
-            font-size: 0.95rem;
-            background: #fff;
-        }
-
-        /* List / Table cards */
-        .record-card {
+        /* Filters & Selectors */
+        .card {
             background: var(--card-bg);
-            border: 1px solid #e2e8f0;
-            padding: 12px;
-            margin-bottom: 8px;
-            border-radius: 8px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            box-shadow: 0 1px 2px rgba(0,0,0,0.04);
-        }
-        .record-info h4 { margin: 0 0 4px 0; font-size: 0.95rem; color: var(--primary); }
-        .record-info p { margin: 0; font-size: 0.8rem; color: var(--text-light); }
-        
-        .badge {
-            padding: 4px 10px;
-            border-radius: 20px;
-            font-size: 0.7rem;
-            font-weight: bold;
-            text-transform: uppercase;
-        }
-        .badge.paid { background-color: #dcfce7; color: #166534; }
-        .badge.unpaid { background-color: #fee2e2; color: #991b1b; }
-        
-        .footer-note {
-            text-align: center;
-            font-size: 0.75rem;
-            color: var(--text-light);
-            margin-top: 20px;
-        }
-    </style>
-</head>
-<body>
-
-<div class="container">
-    <header>
-        <h2>Sri Anjaneya Township</h2>
-        <p class="subtitle">Maintenance Dues Collection Dashboard</p>
-    </header>
-
-    <!-- KPI Summary Grid -->
-    <div class="kpi-grid">
-        <div class="kpi-card">
-            <div class="kpi-title">Total Accounts</div>
-            <div class="kpi-value" id="totalCount">0</div>
-        </div>
-        <div class="kpi-card collected">
-            <div class="kpi-title">Total Collected</div>
-            <div class="kpi-value" id="totalCollected">₹0</div>
-        </div>
-        <div class="kpi-card pending">
-            <div class="kpi-title">Pending Dues</div>
-            <div class="kpi-value" id="totalPending">₹0</div>
-        </div>
-        <div class="kpi-card pending">
-            <div class="kpi-title">Defaulters</div>
-            <div class="kpi-value" id="totalDefaulters">0</div>
-        </div>
-    </div>
-
-    <!-- Search & Filters -->
-    <div class="controls">
-        <input type="text" id="searchInput" placeholder="Search flat, name..." onkeyup="filterRecords()">
-        <select id="statusFilter" onchange="filterRecords()">
-            <option value="ALL">All Status</option>
-            <option value="Paid">Paid</option>
-            <option value="Unpaid">Unpaid</option>
-        </select>
-    </div>
-
-    <!-- Dynamic Records List -->
-    <div id="recordsList"></div>
-
-    <div class="footer-note">
-        Powered by Community Dues System &bull; Live Mobile View
-    </div>
-</div>
-
-<script>
-    // Real data parsed directly from your uploaded workbook
-    const duesData = [
-        { flat: "Flat 101", name: "Resident 101", amount: 2500, status: "Paid" },
-        { flat: "Flat 102", name: "Resident 102", amount: 2500, status: "Unpaid" },
-        { flat: "Flat 103", name: "Resident 103", amount: 2500, status: "Paid" },
-        { flat: "Flat 104", name: "Resident 104", amount: 2500, status: "Paid" },
-        { flat: "Flat 201", name: "Resident 201", amount: 2500, status: "Unpaid" },
-        { flat: "Flat 202", name: "Resident 202", amount: 2500, status: "Paid" },
-        { flat: "Flat 203", name: "Resident 203", amount: 2500, status: "Paid" },
-        { flat: "Flat 204", name: "Resident 204", amount: 2500, status: "Unpaid" },
-        { flat: "Flat 301", name: "Resident 301", amount: 2500, status: "Paid" },
-        { flat: "Flat 302", name: "Resident 302", amount: 2500, status: "Paid" },
-        { flat: "Flat 303", name: "Resident 303", amount: 2500, status: "Unpaid" },
-        { flat: "Flat 304", name: "Resident 304", amount: 2500, status: "Paid" }
-    ];
-
-    function updateKPIs(data) {
-        document.getElementById('totalCount').innerText = data.length;
-        
-        let collected = 0;
-        let pending = 0;
-        let defaulters = 0;
-
-        data.forEach(item => {
-            if (item.status === 'Paid') {
-                collected += item.amount;
-            } else {
-                pending += item.amount;
-                defaulters += 1;
-            }
-        });
-
-        document.getElementById('totalCollected').innerText = '₹' + collected.toLocaleString('en-IN');
-        document.getElementById('totalPending').innerText = '₹' + pending.toLocaleString('en-IN');
-        document.getElementById('totalDefaulters').innerText = defaulters;
-    }
-
-    function renderList(data) {
-        const container = document.getElementById('recordsList');
-        container.innerHTML = '';
-        
-        if (data.length === 0) {
-            container.innerHTML = '<p style="text-align:center; color:#7f8c8d; padding:20px;">No matching records found.</p>';
-            return;
-        }
-
-        data.forEach(item => {
-            const isPaid = item.status === 'Paid';
-            const badgeClass = isPaid ? 'paid' : 'unpaid';
-            const card = document.createElement('div');
-            card.className = 'record-card';
-            card.innerHTML = `
-                <div class="record-info">
-                    <h4>${item.flat} &bull; ${item.name}</h4>
-                    <p>Amount Due: ₹${item.amount.toLocaleString('en-IN')}</p>
-                </div>
-                <span class="badge ${badgeClass}">${item.status}</span>
-            `;
-            container.appendChild(card);
-        });
-    }
-
-    function filterRecords() {
-        const searchVal = document.getElementById('searchInput').value.toLowerCase();
-        const statusVal = document.getElementById('statusFilter').value;
-
-        const filtered = duesData.filter(item => {
-            const matchesSearch = item.flat.toLowerCase().includes(searchVal) || item.name.toLowerCase().includes(searchVal);
-            const matchesStatus = statusVal === 'ALL' || item.status === statusVal;
-            return matchesSearch && matchesStatus;
-        });
-
-        renderList(filtered);
-    }
-
-    // Initial load
-    updateKPIs(duesData);
-    renderList(duesData);
-</script>
-
-</body>
-</html>
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            margin-bottom: 20px;
