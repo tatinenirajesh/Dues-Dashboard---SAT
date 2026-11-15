@@ -124,3 +124,179 @@
             border-radius: 12px;
             box-shadow: 0 2px 4px rgba(0,0,0,0.05);
             margin-bottom: 20px;
+        }
+        .selector-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 15px;
+        }
+        @media(min-width: 600px) {
+            .selector-row { grid-template-columns: 2fr 2fr 1fr; }
+        }
+        .form-group label { display: block; font-size: 0.8rem; font-weight: bold; color: var(--text-light); margin-bottom: 5px; }
+        select, input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            font-size: 0.95rem;
+            background: #fff;
+        }
+
+        /* Tables */
+        .table-responsive {
+            overflow-x: auto;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9rem;
+            margin-top: 10px;
+        }
+        th, td {
+            padding: 10px 12px;
+            border-bottom: 1px solid var(--border);
+            text-align: left;
+        }
+        th {
+            background: #f1f5f9;
+            color: var(--primary);
+            font-weight: 600;
+        }
+        .badge {
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: bold;
+        }
+        .badge.paid { background: #dcfce7; color: #166534; }
+        .badge.unpaid { background: #fee2e2; color: #991b1b; }
+        
+        .footer-note {
+            text-align: center;
+            font-size: 0.75rem;
+            color: var(--text-light);
+            margin-top: 30px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <div>
+            <h2>Sri Anjaneya Township</h2>
+            <p class="subtitle">FY 2026-27 Monthly Collection & Receipt Tracker</p>
+        </div>
+        <div class="actions-bar">
+            <label class="btn btn-success">
+                📂 Import Excel <input type="file" id="excelFile" class="file-input" accept=".xlsx, .xls, .xlsm" onchange="importExcel(event)">
+            </label>
+            <button class="btn" onclick="exportExcel()">📥 Export Filtered</button>
+        </div>
+    </header>
+
+    <!-- Tab Navigation -->
+    <div class="tabs">
+        <button class="tab active" onclick="switchTab('lookup')">🔍 Flat Ledger & Receipts</button>
+        <button class="tab" onclick="switchTab('admin')">📊 Admin KPI Dashboard</button>
+    </div>
+
+    <!-- TAB 1: FLAT LEDGER & PAST 12 MONTHS RECEIPTS -->
+    <div id="lookupPanel" class="panel active">
+        <div class="card">
+            <div class="selector-row">
+                <div class="form-group">
+                    <label>Select Block</label>
+                    <select id="blockSelect" onchange="populateFlats()">
+                        <option value="A">Block A</option>
+                        <option value="B">Block B</option>
+                        <option value="C">Block C</option>
+                        <option value="D">Block D</option>
+                        <option value="F">Block F</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Select Flat No</label>
+                    <select id="flatSelect" onchange="renderFlatLedger()">
+                        <!-- Dynamic Flats -->
+                    </select>
+                </div>
+                <div class="form-group" style="display: flex; align-items: flex-end;">
+                    <button class="btn" style="width:100%; padding: 10px;" onclick="searchQuick()">Search</button>
+                </div>
+            </div>
+
+            <div id="flatDetailsHeader" style="margin-top: 15px; margin-bottom: 10px; font-weight: bold; color: var(--primary);">
+                <!-- Resident Name & Summary -->
+            </div>
+
+            <div class="table-responsive">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Month</th>
+                            <th>Receipt Number</th>
+                            <th>Amount (₹)</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="receiptsTableBody">
+                        <!-- Populated by JS -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- TAB 2: ADMIN KPI DASHBOARD -->
+    <div id="adminPanel" class="panel">
+        <div class="kpi-grid">
+            <div class="kpi-card">
+                <div class="kpi-title">Total Tracked Flats</div>
+                <div class="kpi-value" id="kpiTotalFlats">198</div>
+            </div>
+            <div class="kpi-card success">
+                <div class="kpi-title">Total Collected (FY)</div>
+                <div class="kpi-value" id="kpiCollected">₹0</div>
+            </div>
+            <div class="kpi-card warning">
+                <div class="kpi-title">Total Pending (FY)</div>
+                <div class="kpi-value" id="kpiPending">₹0</div>
+            </div>
+            <div class="kpi-card danger">
+                <div class="kpi-title">Overall Collection %</div>
+                <div class="kpi-value" id="kpiRate">0%</div>
+            </div>
+        </div>
+
+        <div class="card">
+            <h3 style="margin-top:0; color:var(--primary);">Block-wise Collection Summary</h3>
+            <div class="table-responsive">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Block</th>
+                            <th>Flats</th>
+                            <th>Collected (₹)</th>
+                            <th>Pending (₹)</th>
+                            <th>Collection %</th>
+                        </tr>
+                    </thead>
+                    <tbody id="blockSummaryBody">
+                        <!-- Populated by JS -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="footer-note">
+        Sri Anjaneya Township Management System &bull; Live Mobile Dues & Receipt Tracker
+    </div>
+</div>
+
+<script>
+    // Master Database populated from Excel
+    let townshipData = {"A": {"101": {"name": "Resident 101", "months": [{"month": "April - 26", "receiptNo": "OP0044", "amount": 2500}, {"month": "May - 26", "receiptNo": "OP0259", "amount": 2500}, {"month": "June - 26", "receiptNo": "OP0179", "amount": 2500}, {"month": "July - 26", "receiptNo": "OP0402", "amount": 2500}, {"month": "August - 26", "receiptNo": "OP0540", "amount": 2500}, {"month": "September - 26", "receiptNo": "OP0657", "amount": 2500}, {"month": "October - 26", "receiptNo": "OP0793", "amount": 2500}, {"month": "November - 26", "receiptNo": "OP0918", "amount": 2500}, {"month": "December - 26", "receiptNo": "", "amount": 0}, {"month": "January - 27", "receiptNo": "", "amount": 0}, {"month": "February - 27", "receiptNo": "", "amount": 0}, {"month": "March - 27", "receiptNo": "", "amount": 0}]}, "102": {"name": "Boppana Rajendra Prasad", "months": [{"month": "April - 26", "receiptNo": "CP0004", "amount": 2000}, {"month": "May - 26", "receiptNo": "CP0070", "amount": 2000}, {"month": "June - 26", "receiptNo": "CP0148", "amount": 2000}, {"month": "July - 26", "receiptNo": "CP0219", "amount": 2000}, {"month": "August - 26", "receiptNo": "CP0282", "amount": 2000}, {"month": "September - 26", "receiptNo": "CP0336", "amount": 2000}, {"month": "October - 26", "receiptNo": "CP0391", "amount": 2000}, {"month": "November - 26", "receiptNo": "CP0445", "amount": 2000}, {"month": "December - 26", "receiptNo": "", "amount": 0}, {"month": "January - 27", "receiptNo": "", "amount": 0}, {"month": "February - 27", "receiptNo": "", "amount": 0}, {"month": "March - 27", "receiptNo": "", "amount": 0}]}, "103": {"name": "V. Buchi babu (Madhavi)", "months": [{"month": "April - 26", "receiptNo": "CP0005", "amount": 2000}, {"month": "May - 26", "receiptNo": "CP0071", "amount": 2000}, {"month": "June - 26", "receiptNo": "CP0149", "amount": 2000}, {"month": "July - 26", "receiptNo": "CP0220", "amount": 2000}, {"month": "August - 26", "receiptNo": "CP0283", "amount": 2000}, {"month": "September - 26", "receiptNo": "CP0337", "amount": 2000}, {"month": "October - 26", "receiptNo": "CP0392", "amount": 2000}, {"month": "November - 26", "receiptNo": "CP0446", "amount": 2000}, {"month": "December - 26", "receiptNo": "", "amount": 0}, {"month": "January - 27", "receiptNo": "", "amount": 0}, {"month": "February - 27", "receiptNo": "", "amount": 0}, {"month": "March - 27", "receiptNo": "", "amount": 0}]}, "104": {"name": "Jyothi", "months": [{"month": "April - 26", "receiptNo": "OP0043", "amount": 2500}, {"month": "May - 26", "receiptNo": "OP0285", "amount": 2500}, {"month": "June - 26", "receiptNo": "OP0310", "amount": 2500}, {"month": "July - 26", "receiptNo": "OP0394", "amount": 2500}, {"month": "August - 26", "receiptNo": "OP0588", "amount": 2500}, {"month": "September - 26", "receiptNo": "OP0727", "amount": 2500}, {"month": "October - 26", "receiptNo": "OP0861", "amount": 2500}, {"month": "November - 26", "receiptNo": "", "amount": 0}, {"month": "December - 26", "receiptNo": "", "amount": 0}, {"month": "January - 27", "receiptNo": "", "amount": 0}, {"month": "February - 27", "receiptNo": "", "amount": 0}, {"month": "March - 27", "receiptNo": "", "amount": 0}]}, "105": {"name": "Raga Malika", "months": [{"month": "April - 26", "receiptNo": "OP0012", "amount": 2500}, {"month": "May - 26", "receiptNo": "OP0248", "amount": 2500}, {"month": "June - 26", "receiptNo": "OP0145", "amount": 2500}, {"month": "July - 26", "receiptNo": "OP0382", "amount": 2500}, {"month": "August - 26", "receiptNo": "OP0498", "amount": 2500}, {"month": "September - 26", "receiptNo": "OP0634", "amount": 2500}, {"month": "October - 26", "receiptNo": "OP0749", "amount": 2500}, {"month": "November - 26", "receiptNo": "OP0879", "amount": 2500}, {"month": "December - 26", "receiptNo": "", "amount": 0}, {"month": "January - 27", "receiptNo": "", "amount": 0}, {"month": "February - 27", "receiptNo": "", "amount": 0}, {"month": "March - 27", "receiptNo": "", "amount": 0}]}, "106": {"name": "Madhusudhan", "months": [{"month": "April - 26", "receiptNo": "OP0218", "amount": 2000}, {"month": "May - 26", "receiptNo": "OP0132", "amount": 2000}, {"month": "June - 26", "receiptNo": "OP0347", "amount": 2000}, {"month": "July - 26", "receiptNo": "OP0377", "amount": 2000}, {"month": "August - 26", "receiptNo": "OP0532", "amount": 2000}, {"month": "September - 26", "receiptNo": "OP0623", "amount": 2000}, {"month": "October - 26", "receiptNo": "OP0757", "amount": 2000}, {"month": "November - 26", "receiptNo": "OP0895", "amount": 2000}, {"month": "December - 26", "receiptNo": "", "amount": 0}, {"month": "January - 27", "receiptNo": "", "amount": 0}, {"month": "February - 27", "receiptNo": "", "amount": 0}, {"month": "March - 27", "receiptNo": "", "amount": 0}]}, "107": {"name": "Y  Eswara Rao", "months": [{"month": "April - 26", "receiptNo": "OP0031", "amount": 2000}, {"month": "May - 26", "receiptNo": "OP0249", "amount": 2000}, {"month": "June - 26", "receiptNo": "OP0171", "amount": 2000}, {"month": "July - 26", "receiptNo": "OP0387", "amount": 2000}, {"month": "August - 26", "receiptNo": "OP0522", "amount": 2000}, {"month": "September - 26", "receiptNo": "OP0646", "amount": 2000}, {"month": "October - 26", "receiptNo": "OP0770", "amount": 2000}, {"month": "November - 26", "receiptNo": "OP0905", "amount": 2000}, {"month": "December - 26", "receiptNo": "", "amount": 0}, {"month": "January - 27", "receiptNo": "", "amount": 0}, {"month": "February - 27", "receiptNo": "", "amount": 0}, {"month": "March - 27", "receiptNo": "", "amount": 0}]}, "108": {"name": "V Padma Kala", "months": [{"month": "April - 26", "receiptNo": "OP0033", "amount": 2500}, {"month": "May - 26", "receiptNo": "OP0231", "amount": 2500}, {"month": "June - 26", "receiptNo": "OP0156", "amount": 2500}, {"month": "July - 26", "receiptNo": "OP0375", "amount": 2500}, {"month": "August - 26", "receiptNo": "OP0499", "amount": 2500}, {"month": "September - 26", "receiptNo": "OP0629", "amount": 2500}, {"month": "October - 26", "receiptNo": "OP0765", "amount": 2500}, {"month": "November - 26", "receiptNo": "OP0910", "amount": 2500}, {"month": "December - 26", "receiptNo": "", "amount": 0}, {"month": "January - 27", "receiptNo": "", "amount": 0}, {"month": "February - 27", "receiptNo": "", "amount": 0}, {"month": "March - 27", "receiptNo": "", "amount": 0}]}, "201": {"name": "N Suneel", "months": [{"month": "April - 26", "receiptNo": "CP0016", "amount": 2500}, {"month": "May - 26", "receiptNo": "CP0146", "amount": 2500}, {"month": "June - 26", "receiptNo": "CP0146", "amount": 2500}, {"month": "July - 26", "receiptNo": "CP0275", "amount": 2500}, {"month": "August - 26", "receiptNo": "CP0314", "amount": 2500}, {"month": "September - 26", "receiptNo": "CP0358", "amount": 2500}, {"month": "October - 26", "receiptNo": "CP0484", "amount": 2500}, {"month": "November - 26", "receiptNo": "CP0484", "amount": 2500}, {"month": "December - 26", "receiptNo": "CP0484", "amount": 2500}, {"month": "January - 27", "receiptNo": "CP0484", "amount": 2500}, {"month": "February - 27", "receiptNo": "", "amount": 0}, {"month": "March - 27", "receiptNo": "", "amount": 0}]}, "202": {"name": "CH. Prasad", "months": [{"month": "April - 26", "receiptNo": "CP0022", "amount": 2000}, {"month": "May - 26", "receiptNo": "CP0080", "amount": 2000}, {"month": "June - 26", "receiptNo": "CP0162", "amount": 2000}, {"month": "July - 26", "receiptNo": "CP0256", "amount": 2000}, {"month": "August - 26", "receiptNo": "CP0319", "amount": 2000}, {"month": "September - 26", "receiptNo": "CP0350", "amount": 2000}, {"month": "October - 26", "receiptNo": "CP0406", "amount": 2000}, {"month": "November - 26", "receiptNo": "CP0460", "amount": 2000}, {"month": "December - 26", "receiptNo": "", "amount": 0}, {"month": "January - 27", "receiptNo": "", "amount": 0}, {"month": "February - 27", "receiptNo": "", "amount": 0}, {"month": "March - 27", "receiptNo": "", "amount": 0}]}, "203": {"name": "Resident 203", "months": [{"month": "April - 26", "receiptNo": "OP0011", "amount": 2000}, {"month": "May - 26", "receiptNo": "OP0254", "amount": 2000}, {"month": "June - 26", "receiptNo": "OP0338", "amount": 2000}, {"month": "July - 26", "receiptNo": "OP0379", "amount": 2000}, {"month": "August - 26", "receiptNo": "OP0531", "amount": 2000}, {"month": "September - 26", "receiptNo": "OP0658", "amount": 2000}, {"month": "October - 26", "receiptNo": "OP0776", "amount": 2000}, {"month": "November - 26", "receiptNo": "OP0902", "amount": 2000}, {"month": "December - 26", "receiptNo": "", "amount": 0}, {"month": "January - 27", "receiptNo": "", "amount": 0}, {"month": "February - 27", "receiptNo": "", "amount": 0}, {"month": "March - 27", "receiptNo": "", "amount": 0}]}, "204": {"name": "R Ramesh", "months": [{"month": "April - 26", "receiptNo": "CP0010", "amount": 2500}, {"month": "May - 26", "receiptNo": "CP0075", "amount": 2500}, {"month": "June - 26", "receiptNo": "CP0150", "amount": 2500}, {"month": "July - 26", "receiptNo": "CP0221", "amount": 2500}, {"month": "August - 26", "receiptNo": "CP0289", "amount": 2500}, {"month": "September - 26", "receiptNo": "CP0341", "amount": 2500}, {"month": "October - 26", "receiptNo": "OP0756", "amount": 2500}, {"month": "November - 26", "receiptNo": "OP0899", "amount": 2500}, {"month": "December - 26", "receiptNo": "", "amount": 0}, {"month": "January - 27", "receiptNo": "", "amount": 0}, {"month": "February - 27", "receiptNo": "", "amount": 0}, {"month": "March - 27", "receiptNo": "", "amount": 0}]}, "205": {"name": "C Venkata Lakshmi Raju", "months": [{"month": "April - 26", "receiptNo": "OP0045", "amount": 2500}, {"month": "May - 26", "receiptNo": "OP0242", "amount": 2500}, {"month": "June - 26", "receiptNo": "OP0177", "amount": 2500}, {"month": "July - 26", "receiptNo": "OP0397", "amount": 2500}, {"month": "August - 26", "receiptNo": "OP0542", "amount": 2500}, {"month": "September - 26", "receiptNo": "OP0620", "amount": 2500}, {"month": "October - 26", "receiptNo": "OP0745", "amount": 2500}, {"month": "November - 26", "receiptNo": "OP0890", "amount": 2500}, {"month": "December - 26", "receiptNo": "", "amount": 0}, {"month": "January - 27", "receiptNo": "", "amount": 0}, {"month": "February - 27", "receiptNo": "", "amount": 0}, {"month": "March - 27", "receiptNo": "", "amount": 0}]}, "206": {"name": "Mallikarjuna", "months": [{"month": "April - 26", "receiptNo": "Op0279", "amount": 2000}, {"month": "May - 26", "receiptNo": "OP0279", "amount": 2000}, {"month": "June - 26", "receiptNo": "OP0312", "amount": 2000}, {"month": "July - 26", "receiptNo": "OP0446", "amount": 2000}, {"month": "August - 26", "receiptNo": "OP0608", "amount": 2000}, {"month": "September - 26", "receiptNo": "OP0691", "amount": 2000}, {"month": "October - 26", "receiptNo": "OP0860", "amount": 2000}, {"month": "November - 26", "receiptNo": "OP0924", "amount": 2000}, {"month": "December - 26", "receiptNo": "", "amount": 0}, {"month": "January - 27", "receiptNo": "", "amount": 0}, {"month": "February - 27", "receiptNo": "", "amount": 0}, {"month": "March - 27", "receiptNo": "", "amount": 0}]}, "207": {"name": "M Kiran Reddy", "months": [{"month": "April - 26", "receiptNo": "OP0026", "amount": 2000}, {"month": "May - 26", "receiptNo": "OP0243", "amount": 2000}, {"month": "June - 26", "receiptNo": "OP0162", "amount": 2000}, {"month": "July - 26", "receiptNo": "OP0482", "amount": 2000}, {"month": "August - 26", "receiptNo": "OP0490", "amount": 2000}, {"month": "September - 26", "receiptNo": "OP0644", "amount": 2000}, {"month": "October - 26", "receiptNo": "OP0762", "amount": 2000}, {"month": "November - 26", "receiptNo": "OP0906", "amount": 2000}, {"month": "December - 26", "receiptNo": "", "amount": 0}, {"month": "January - 27", "receiptNo": "", "amount": 0}, {"month": "February - 27", "receiptNo": "", "amount": 0}, {"month": "March - 27", "receiptNo": "", "amount": 0}]}, "208": {"name": "Resident 208", "months": [{"month": "April - 26", "receiptNo": "OP0034", "amount": 2500}, {"month": "May - 26", "receiptNo": "OP0232", "amount": 2500}, {"month": "June - 26", "receiptNo": "OP0157", "amount": 2500}, {"month": "July - 26", "receiptNo": "OP0376", "amount": 2500}, {"month": "August - 26", "receiptNo": "OP0500", "amount": 2500}, {"month": "September - 26", "receiptNo": "OP0630", "amount": 2500}, {"month": "October - 26", "receiptNo": "OP0766", "amount": 2500}, {"month": "November - 26", "receiptNo": "OP0911", "amount": 2500}, {"month": "December - 26", "receiptNo": "", "amount": 0}, {"month": "January - 27", "receiptNo": "", "amount": 0}, {"month": "February - 27", "receiptNo": "", "amount": 0}, {"month": "March - 27", "receiptNo": "", "amount": 0}]}, "301": {"name": "G Ravi Kumar", "months": [{"month": "April - 26", "receiptNo": "OP0072", "amount": 2500}, {"month": "May - 26", "receiptNo": "OP0291", "amount": 2500}, {"month": "June - 26", "receiptNo": "OP0341", "amount": 2500}, {"month": "July - 26", "receiptNo": "OP0439", "amount": 2500}, {"month": "August - 26", "receiptNo": "OP0604", "amount": 2500}, {"month": "September - 26", "receiptNo": "OP0725", "amount": 2500}, {"month": "October - 26", "receiptNo": "OP0844", "amount": 2500}, {"month": "November - 26", "receiptNo": "", "amount": 0}, {"month": "December - 26", "receiptNo": "", "amount": 0}, {"month": "January - 27", "receiptNo": "", "amount": 0}, {"month": "February - 27", "receiptNo": "", "amount": 0}, {"month": "March - 27", "receiptNo": "", "amount": 0}]}, "302": {"name": "K Santhi Swaroop", "months": [{"month": "April - 26", "receiptNo": "OP0219", "amount": 2000}, {"month": "May - 26", "receiptNo": "OP0447", "amount": 2000}, {"month": "June - 26", "receiptNo": "OP0447", "amount": 2000}, {"month": "July - 26", "receiptNo": "OP0447", "amount": 2000}, {"month": "August - 26", "receiptNo": "OP0533", "amount": 2000}, {"month": "September - 26", "receiptNo": "CP0441", "amount": 2000}, {"month": "October - 26", "receiptNo": "CP0441", "amount": 2000}, {"month": "November - 26", "receiptNo": "", "amount": 0}, {"month": "December - 26", "receiptNo": "", "amount": 0}, {"month": "January - 27", "receiptNo": "", "amount": 0}, {"month": "February - 27", "receiptNo": "", "amount": 0}, {"month": "March - 27", "receiptNo": "", "amount": 0}]}, "303": {"name": "M Subhash", "months": [{"month": "April - 26", "receiptNo": "", "amount": 0}, {"month": "May - 26", "receiptNo": "", "amount": 0}, {"month": "June - 26", "receiptNo": "", "amount": 0}, {"month": "July - 26", "receiptNo": "", "amount": 0}, {"month": "August - 26", "receiptNo": "", "amount": 0}, {"month": "September - 26", "receiptNo": "", "amount": 0}, {"month": "October - 26", "receiptNo": "", "amount": 0}, {"month": "November - 26", "receiptNo": "", "amount": 0}, {"month": "December - 26", "receiptNo": "", "amount": 0}, {"month": "January - 27", "receiptNo": "", "amount": 0}, {"month": "February - 27", "receiptNo": "", "amount": 0}, {"month": "March - 27", "receiptNo": "", "amount": 0}]}, "304": {"name": "Kguru Prasad . Vanaja", "months": [{"month": "April - 26", "receiptNo": "CP0062", "amount": 2500}, {"month": "May - 26", "receiptNo": "CP0087", "amount": 2500}, {"month": "June - 26", "receiptNo": "CP0087", "amount": 2500}, {"month": "July - 26", "receiptNo": "OP0355", "amount": 2500}, {"month": "August - 26", "receiptNo": "OP0355", "amount": 2500}, {"month": "September - 26", "receiptNo": "OP0612", "amount": 2500}, {"month": "October - 26", "receiptNo": "OP0612", "amount": 2500}, {"month": "November - 26", "receiptNo": "OP0882", "amount": 2500}, {"month": "December - 26", "receiptNo": "OP0882", "amount": 2500}, {"month": "January - 27", "receiptNo": "", "amount": 0}, {"month": "February - 27", "receiptNo": "", "amount": 0}, {"month": "March - 27", "receiptNo": "", "amount": 0}]}, "305": {"name": "Ch Harinath Prasad", "months": [{"month": "April - 26", "receiptNo": "CP0021", "amount": 2500}, {"month": "May - 26", "receiptNo": "CP0089", "amount": 2500}, {"month": "June - 26", "receiptNo": "CP0166", "amount": 2500}, {"month": "July - 26", "receiptNo": "CP0257", "amount": 2500}, {"month": "August - 26", "receiptNo": "OP0552", "amount": 2500}, {"month": "September - 26", "receiptNo": "CP0382", "amount": 2500}, {"month": "October - 26", "receiptNo": "OP0774", "amount": 2500}, {"month": "November - 26", "receiptNo": "OP0926", "amount": 2500}, {"month": "December - 26", "receiptNo": "", "amount": 0}, {"month": "January - 27", "receiptNo": "", "amount": 0}, {"month": "February - 27", "receiptNo": "", "amount": 0}, {"month": "March - 27", "receiptNo": "", "amount": 0}]}, "306": {"name": "Resident 306", "months": [{"month": "April - 26", "receiptNo": "OP0010", "amount": 2000}, {"month": "May - 26", "receiptNo": "OP0233", "amount": 2000}, {"month": "June - 26", "receiptNo": "OP0141", "amount": 2000}, {"month": "July - 26", "receiptNo": "OP0368", "amount": 2000}, {"month": "August - 26", "receiptNo": "OP0492", "amount": 2000}, {"month": "September - 26", "receiptNo": "OP0626", "amount": 2000}, {"month": "October - 26", "receiptNo": "OP0747", "amount": 2000}, {"month": "November - 26", "receiptNo": "OP0886", "amount": 2000}, {"month": "December - 26", "receiptNo": "", "amount": 0}, {"month": "January - 27", "receiptNo": "", "amount": 0}, {"month": "February - 27", "receiptNo": "", "amount": 0}, {"month": "March - 27", "receiptNo": "", "amount": 0}]}, "307": {"name": "K Rajesh Choudary", "months": [{"month": "April - 26", "receiptNo": "OP0264", "amount": 2000}, {"month": "May - 26", "receiptNo": "OP0307", "amount": 2000}, {"month": "June - 26", "receiptNo": "OP0419", "amount": 2000}, {"month": "July - 26", "receiptNo": "OP0549", "amount": 2000}, {"month": "August - 26", "receiptNo": "OP0668", "amount": 2000}, {"month": "September - 26", "receiptNo": "Op0851", "amount": 2000}, {"month": "October - 26", "receiptNo": "OP0893", "amount": 2000}, {"month": "November - 26", "receiptNo": "", "amount": 0}, {"month": "December - 26", "receiptNo": "", "amount": 0}, {"month": "January - 27", "receiptNo": "", "amount": 0}, {"month": "February - 27", "receiptNo": "", "amount": 0}, {"month": "March - 27", "receiptNo": "", "amount": 0}]}, "308": {"name": "Sita Reddy", "months": [{"month": "April - 26", "receiptNo": "OP0036", "amount": 2500}, {"month": "May - 26", "receiptNo": "OP0253", "amount": 2500}, {"month": "June - 26", "receiptNo": "OP0325", "amount": 2500}, {"month": "July - 26", "receiptNo": "OP0390", "amount": 2500}, {"month": "August - 26", "receiptNo": "OP0514", "amount": 2500}, {"month": "September - 26", "receiptNo": "OP0639", "amount": 2500}, {"month": "October - 26", "receiptNo": "OP0771", "amount": 2500}, {"month": "November - 26", "receiptNo": "OP0901", "amount": 2500}, {"month": "December - 26", "receiptNo": "", "amount": 0}, {"month": "January - 27", "receiptNo": "", "amount": 0}, {"month": "February - 27", "receiptNo": "", "amount": 0}, {"month": "March - 27", "receiptNo": "", "amount": 0}]}, "401": {"name": "S Brahmayya", "months": [{"month": "April - 26", "receiptNo": "OP0039", "amount": 2500}, {"month": "May - 26", "receiptNo": "OP0270", "amount": 2500}, {"month": "June - 26", "receiptNo": "OP0173", "amount": 2500}, {"month": "July - 26", "receiptNo": "OP0389", "amount": 2500}, {"month": "August - 26", "receiptNo": "OP0536", "amount": 2500}, {"month": "September - 26", "receiptNo": "OP0671", "amount": 2500}, {"month": "October - 26", "receiptNo": "OP0866", "amount": 2500}, {"month": "November - 26", "receiptNo": "3", "amount": 2500}, {"month": "December - 26", "receiptNo": "3", "amount": 2500}, {"month": "January - 27", "receiptNo": "3", "amount": 2500}, {"month": "February - 27", "receiptNo": "", "amount": 0}, {"month": "March - 27", "receiptNo": "", "amount": 0}]}, "402": {"name": "V Prameela Rani", "months": [{"month": "April - 26", "receiptNo": "OP0083", "amount": 2000}, {"month": "May - 26", "receiptNo": "OP0293", "amount": 2000}, {"month": "June - 26", "receiptNo": "OP0180", "amount": 2000}, {"month": "July - 26", "receiptNo": "OP0470", "amount": 2000}, {"month": "August - 26", "receiptNo": "OP0557", "amount": 2000}, {"month": "September - 26", "receiptNo": "OP0696", "amount": 2000}, {"month": "October - 26", "receiptNo": "OP0795", "amount": 2000}, {"month": "November - 26", "receiptNo": "", "amount": 0}, {"month": "December - 26", "receiptNo": "", "amount": 0}, {"month": "January - 27", "receiptNo": "", "amount": 0}, {"month": "February - 27", "receiptNo": "", "amount": 0}, {"month": "March - 27", "receiptNo": "", "amount": 0}]}, "403": {"name": "V Murali Krishna", "months": [{"month": "April - 26", "receiptNo": "OP0084", "amount": 2000}, {"month": "May - 26", "receiptNo": "OP0294", "amount": 2000}, {"month": "June - 26", "receiptNo": "OP0181", "amount": 2000}, {"month": "July - 26", "receiptNo": "OP0471", "amount": 2000}, {"month": "August - 26", "receiptNo": "OP0558", "amount": 2000}, {"month": "September - 26", "receiptNo": "OP0697", "amount": 2000}, {"month": "October - 26", "receiptNo": "OP0796", "amount": 2000}, {"month": "November - 26", "receiptNo": "", "amount": 0}, {"month": "December - 26", "receiptNo": "", "amount": 0}, {"month": "January - 27", "receiptNo": "", "amount": 0}, {"month": "February - 27", "receiptNo": "", "amount": 0}, {"month": "March - 27", "receiptNo": "", "amount": 0}]}, "404": {"name": "Venkateswarrao", "months": [{"month": "April - 26", "receiptNo": "OP0222", "amount": 2500}, {"month": "May - 26", "receiptNo": "OP0134", "amount": 2500}, {"month": "June - 26", "receiptNo": "OP0356", "amount": 2500}, {"month": "July - 26", "receiptNo": "OP0478", "amount": 2500}, {"month": "August - 26", "receiptNo": "OP0611", "amount": 2500}, {"month": "September - 26", "receiptNo": "OP0728", "amount": 2500}, {"month": "October - 26", "receiptNo": "OP0870", "amount": 2500}, {"month": "November - 26", "receiptNo": "", "amount": 0}, {"month": "December - 26", "receiptNo": "", "amount": 0}, {"month": "January - 27", "receiptNo": "", "amount": 0}, {"month": "February - 27", "receiptNo": "", "amount": 0}, {"month": "March - 27", "receiptNo": "", "amount": 0}]}, "405": {"name": "K Kanaka Durga Bhavani", "months": [{"month": "April - 26", "receiptNo": "CP0001", "amount": 2500}, {"month": "May - 26", "receiptNo": "CP0121", "amount": 2500}, {"month": "June - 26", "receiptNo": "CP0202", "amount": 2500}, {"month": "July - 26", "receiptNo": "CP0255", "amount": 2500}, {"month": "August - 26", "receiptNo": "CP0295", "amount": 2500}, {"month": "September - 26", "receiptNo": "CP0361", "amount": 2500}, {"month": "October - 26", "receiptNo": "CP0402", "amount": 2500}, {"month": "November - 26", "receiptNo": "", "amount": 0}, {"month": "December - 26", "receiptNo": "", "amount": 0}, {"month": "January - 27", "receiptNo": "", "amount": 0}, {"month": "February - 27", "receiptNo": "", "amount": 0}, {"month": "March - 27", "receiptNo": "", "amount": 0}]}, "406": {"name": "K SatyaPrasad", "months": [{"month": "April - 26", "receiptNo": "
