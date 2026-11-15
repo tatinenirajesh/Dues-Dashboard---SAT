@@ -51,7 +51,7 @@ select[multiple]{height:118px}.actions{display:flex;gap:8px;flex-wrap:wrap;align
 <div class="kpi"><small>Total flats</small><strong id="aFlats">198</strong></div><div class="kpi"><small>Total receivable</small><strong id="aReceivable">₹0</strong></div><div class="kpi"><small>Total received</small><strong class="green" id="aReceived">₹0</strong></div><div class="kpi"><small>Collection rate</small><strong class="blue" id="aRate">0%</strong></div>
 </div>
 <div class="card">
-<h2 class="section-title">Block-wise Collection Summary</h2><p class="sub">FY view covers all 12 months. Month view shows the selected month only. Paid-flat counts distinguish fully paid flats from flats with at least one payment.</p>
+<h2 class="section-title">Block-wise Collection Summary</h2><p class="sub">FY view covers months due through the current month. Future months are excluded from FY totals. Month view shows the selected month only. Paid Flats are shown as Any Payment / Fully Paid.</p>
 <div class="grid">
 <div class="field"><label for="aMode">View</label><select id="aMode"><option value="FY">Financial Year</option><option value="MONTH">Month</option></select></div>
 <div class="field"><label for="aFY">Financial Year</label><select id="aFY"></select></div>
@@ -59,24 +59,24 @@ select[multiple]{height:118px}.actions{display:flex;gap:8px;flex-wrap:wrap;align
 </div>
 <div class="actions" style="margin:12px 0"><button class="btn" onclick="renderAdmin()">Apply</button><button class="btn secondary" onclick="exportAdmin()">Export Summary</button><label class="btn secondary" for="excelFile">Import Excel Workbook</label><input id="excelFile" type="file" accept=".xlsx,.xls,.xlsm" class="hidden"></div>
 <div class="notice" id="importStatus">Dashboard is loaded with the uploaded FY 2026-27 workbook. Importing another workbook replaces the current dataset after validation.</div>
-<div class="table-wrap"><table><thead><tr><th>Block</th><th>Total Flats</th><th>Paid at least once</th><th>Fully paid</th><th>Partially paid</th><th>No payment</th><th>Receivable</th><th>Received</th><th>Pending</th><th>Collection %</th></tr></thead><tbody id="adminBody"></tbody><tfoot id="adminFoot"></tfoot></table></div>
+<div class="table-wrap"><table><thead><tr><th>Block</th><th>Total Flats</th><th>Paid Flats (Any / Full)</th><th>Total Receivable</th><th>Total Received</th><th>Collection %</th></tr></thead><tbody id="adminBody"></tbody><tfoot id="adminFoot"></tfoot></table></div>
 </div>
 </section>
 <section id="analytics" class="panel">
 <div class="card">
 <h2 class="section-title">Interactive Analytics Filters</h2><p class="sub">Use multi-select filters to compare collection trends by block or individual flats.</p>
 <div class="filter-grid">
-<div><div class="filter-head"><span class="filter-title">Financial Years</span><button onclick="setAll('xFY',true)">Select all</button></div><div class="filterbox" id="xFY"></div></div>
-<div><div class="filter-head"><span class="filter-title">Blocks</span><button onclick="setAll('xBlocks',true)">Select all</button></div><div class="filterbox" id="xBlocks"></div></div>
-<div><div class="filter-head"><span class="filter-title">Months</span><button onclick="setAll('xMonths',true)">Select all</button></div><div class="filterbox" id="xMonths"></div></div>
-<div><div class="filter-head"><span class="filter-title">Flats</span><button onclick="setAll('xFlats',true)">Select all</button></div><div class="filterbox" id="xFlats"></div></div>
+<div><div class="filter-head"><span class="filter-title">Financial Years</span><button onclick="setAll('xFY',true)">Select all</button><button onclick="setAll('xFY',false)">Unselect all</button></div><div class="filterbox" id="xFY"></div></div>
+<div><div class="filter-head"><span class="filter-title">Blocks</span><button onclick="setAll('xBlocks',true)">Select all</button><button onclick="setAll('xBlocks',false)">Unselect all</button></div><div class="filterbox" id="xBlocks"></div></div>
+<div><div class="filter-head"><span class="filter-title">Months</span><button onclick="setAll('xMonths',true)">Select all</button><button onclick="setAll('xMonths',false)">Unselect all</button></div><div class="filterbox" id="xMonths"></div></div>
+<div><div class="filter-head"><span class="filter-title">Flats</span><button onclick="setAll('xFlats',true)">Select all</button><button onclick="setAll('xFlats',false)">Unselect all</button></div><div class="filterbox" id="xFlats"></div></div>
 </div>
 <div class="actions" style="margin-top:12px"><button class="btn" onclick="renderAnalytics()">Apply Filters</button><button class="btn secondary" onclick="resetAnalytics()">Reset All</button><div class="field right" style="min-width:190px"><label for="xSeries">Chart grouping</label><select id="xSeries"><option value="BLOCK">Block-wise collections</option><option value="FLAT">Flat-wise collections</option><option value="TOTAL">Overall collections</option></select></div></div>
 </div>
 <div class="kpis">
 <div class="kpi"><small>Filtered receivable</small><strong id="xReceivable">₹0</strong></div><div class="kpi"><small>Filtered received</small><strong class="green" id="xReceived">₹0</strong></div><div class="kpi"><small>Filtered pending</small><strong class="red" id="xPending">₹0</strong></div><div class="kpi"><small>Collection rate</small><strong class="blue" id="xRate">0%</strong></div>
 </div>
-<div class="card"><h2 class="section-title">Maintenance Collection Trend</h2><p class="sub">Monthly received amount across the selected period. Unpaid months remain zero in collections; pending amounts are calculated separately.</p><div class="chartbox"><canvas id="trendChart"></canvas></div></div>
+<div class="notice" id="analyticsScope">Analytics period and filter scope</div><div class="card"><h2 class="section-title">Maintenance Collection Trend</h2><p class="sub">Monthly actual receipts across selected months, including any advance entries. KPI and detail totals count months due through the current month.</p><div class="chartbox"><canvas id="trendChart"></canvas></div></div>
 <div class="card"><h2 class="section-title">Block-wise / Flat-wise Collection Detail</h2><div class="table-wrap"><table><thead><tr><th>Block</th><th>Flat</th><th>Resident</th><th>Receivable</th><th>Received</th><th>Pending</th><th>Collection %</th><th>Paid Months</th><th>Unpaid Months</th></tr></thead><tbody id="analyticsBody"></tbody></table></div></div>
 </section>
 </main>
@@ -102,14 +102,52 @@ function initFilters(){
  document.getElementById('lBlocks').addEventListener('change',updateLedgerFlatOptions);
  document.getElementById('aMode').addEventListener('change',()=>{document.getElementById('aMonthWrap').classList.toggle('hidden',document.getElementById('aMode').value==='FY');renderAdmin()});
  document.getElementById('excelFile').addEventListener('change',importWorkbook);
- updateLedgerFlatOptions();renderLedger();renderAdmin();renderAnalytics();
+ document.getElementById('xSeries').addEventListener('change',renderAnalytics);
+ updateLedgerFlatOptions();refreshCrossFilters();renderLedger();renderAdmin();renderAnalytics();
 }
 function addChecks(id,items,values){
- const box=document.getElementById(id);
+ const box=document.getElementById(id);box.innerHTML='';
  items.forEach((label,i)=>{const val=values?values[i]:label;const wrap=document.createElement('label');const cb=document.createElement('input');cb.type='checkbox';cb.value=val;cb.checked=true;wrap.append(cb,document.createTextNode(label));box.appendChild(wrap)});
 }
-function setAll(id,on){document.querySelectorAll('#'+id+' input').forEach(x=>x.checked=on)}
+function setAll(id,on){document.querySelectorAll('#'+id+' input').forEach(x=>x.checked=on);refreshCrossFilters(id);renderAnalytics()}
 function checked(id){return [...document.querySelectorAll('#'+id+' input:checked')].map(x=>x.value)}
+function filterSnapshot(){
+ return {fys:checked('xFY'),blocks:checked('xBlocks'),months:checked('xMonths'),flats:checked('xFlats')};
+}
+function refreshCrossFilters(changedId){
+ const s=filterSnapshot();
+ const allVals={
+  xFY:fyList(),
+  xBlocks:uniq(data.map(r=>r.block)).sort(),
+  xMonths:uniq(data.flatMap(r=>r.months.map(m=>m.month))).sort((a,b)=>data.flatMap(r=>r.months).find(m=>m.month===a).monthKey.localeCompare(data.flatMap(r=>r.months).find(m=>m.month===b).monthKey)),
+  xFlats:data.map(flatKey).sort()
+ };
+ ['xFY','xBlocks','xMonths','xFlats'].forEach(id=>{
+  const candidates=data.filter(r=>{
+   if(id!=='xBlocks' && s.blocks.length && !s.blocks.includes(r.block))return false;
+   if(id!=='xFlats' && s.flats.length && !s.flats.includes(flatKey(r)))return false;
+   return r.months.some(m=>
+    (id==='xFY'||!s.fys.length||s.fys.includes(m.fy)) &&
+    (id==='xMonths'||!s.months.length||s.months.includes(m.month))
+   );
+  });
+  let allowed=[];
+  if(id==='xFY') allowed=uniq(candidates.flatMap(r=>r.months.filter(m=>!s.months.length||s.months.includes(m.month)).map(m=>m.fy))).sort();
+  if(id==='xBlocks') allowed=uniq(candidates.map(r=>r.block)).sort();
+  if(id==='xMonths') allowed=uniq(candidates.flatMap(r=>r.months.filter(m=>!s.fys.length||s.fys.includes(m.fy)).map(m=>m.month))).sort((a,b)=>{
+   const ma=data.flatMap(r=>r.months).find(m=>m.month===a),mb=data.flatMap(r=>r.months).find(m=>m.month===b);return ma.monthKey.localeCompare(mb.monthKey)
+  });
+  if(id==='xFlats') allowed=uniq(candidates.map(flatKey)).sort();
+  const allowedSet=new Set(allowed), prior=new Set(s[id==='xFY'?'fys':id==='xBlocks'?'blocks':id==='xMonths'?'months':'flats']);
+  const box=document.getElementById(id);box.innerHTML='';
+  allVals[id].forEach(v=>{
+   const label=id==='xBlocks'?'Block '+v:id==='xFlats'?v+' | '+((data.find(r=>flatKey(r)===v)||{}).name||'Name not available'):v;
+   const wrap=document.createElement('label'),cb=document.createElement('input');cb.type='checkbox';cb.value=v;cb.checked=prior.has(v);cb.disabled=!allowedSet.has(v);
+   cb.addEventListener('change',()=>{refreshCrossFilters(id);renderAnalytics()});
+   wrap.append(cb,document.createTextNode(label));if(!allowedSet.has(v))wrap.style.opacity='.45';box.appendChild(wrap);
+  });
+ });
+}
 function updateLedgerFlatOptions(){
  const blocks=selected('lBlocks');const flats=data.filter(r=>blocks.includes(r.block)).map(flatKey).sort();
  fillSelect('lFlats',flats);
@@ -134,7 +172,8 @@ function renderLedger(){
  document.getElementById('ledgerSummary').innerHTML=`<span>Ledger rows: <b>${rows.length.toLocaleString('en-IN')}</b></span><span>Flats represented: <b>${flats.size}</b></span><span>Paid months: <b>${paid}</b></span><span>Unpaid months: <b>${unpaid}</b></span>`;
  if(!rows.length)body.innerHTML='<tr><td colspan="10" class="muted">No records match the selected filters.</td></tr>';
 }
-function periodMonths(mode,fy,month){const found=data.flatMap(r=>r.months).filter(m=>m.fy===fy&&(mode==='FY'||m.month===month));const byKey=new Map(found.map(m=>[m.monthKey,m]));return [...byKey.values()].sort((a,b)=>a.monthKey.localeCompare(b.monthKey))}
+function currentMonthKey(){const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')}
+function periodMonths(mode,fy,month){const found=data.flatMap(r=>r.months).filter(m=>m.fy===fy&&(mode==='FY'?m.monthKey<=currentMonthKey():m.month===month));const byKey=new Map(found.map(m=>[m.monthKey,m]));return [...byKey.values()].sort((a,b)=>a.monthKey.localeCompare(b.monthKey))}
 function summarize(records,months){
  let rec=0,got=0,paidAny=0,full=0,partial=0;
  records.forEach(r=>{let rr=0,gg=0,pm=0;months.forEach(m=>{rr+=r.fee;const hit=r.months.find(x=>x.monthKey===m.monthKey);if(hit&&hit.receipt){gg+=hit.amount||0;pm++}});rec+=rr;got+=gg;if(pm>0)paidAny++;if(pm===months.length&&months.length>0)full++;if(pm>0&&pm<months.length)partial++});
@@ -145,22 +184,34 @@ function renderAdmin(){
  const months=periodMonths(mode,fy,month);const rows=[];
  BLOCKS.forEach(b=>{const rr=data.filter(r=>r.block===b);rows.push({block:b,flats:rr.length,...summarize(rr,months)})});
  const total=summarize(data,months);
- document.getElementById('aFlats').textContent=data.length;document.getElementById('aReceivable').textContent=money(total.rec);document.getElementById('aReceived').textContent=money(total.got);document.getElementById('aRate').textContent=total.rate.toFixed(1)+'%';
+ document.getElementById('aFlats').textContent=data.length;
+ document.getElementById('aReceivable').textContent=money(total.rec);
+ document.getElementById('aReceived').textContent=money(total.got);
+ document.getElementById('aRate').textContent=total.rate.toFixed(1)+'%';
+ const periodLabel=mode==='FY'?fy:month+' ('+fy+')';
  const body=document.getElementById('adminBody');body.innerHTML='';
- rows.forEach(x=>{const tr=document.createElement('tr');tr.innerHTML=`<td><b>Block ${x.block}</b></td><td>${x.flats}</td><td>${x.paidAny}</td><td>${x.full}</td><td>${x.partial}</td><td>${x.unpaid}</td><td>${money(x.rec)}</td><td class="green">${money(x.got)}</td><td class="red">${money(x.pending)}</td><td>${x.rate.toFixed(1)}%</td>`;body.appendChild(tr)});
- document.getElementById('adminFoot').innerHTML=`<tr><th>Total</th><th>${data.length}</th><th>${total.paidAny}</th><th>${total.full}</th><th>${total.partial}</th><th>${total.unpaid}</th><th>${money(total.rec)}</th><th>${money(total.got)}</th><th>${money(total.pending)}</th><th>${total.rate.toFixed(1)}%</th></tr>`;
+ rows.forEach(x=>{
+  const tr=document.createElement('tr');
+  tr.innerHTML=`<td><b>Block ${x.block}</b></td><td>${x.flats}</td><td>${x.paidAny} / ${x.full}</td><td>${money(x.rec)}</td><td class="green">${money(x.got)}</td><td>${x.rate.toFixed(1)}%</td>`;
+  body.appendChild(tr);
+ });
+ document.getElementById('adminFoot').innerHTML=`<tr><th>Total</th><th>${data.length}</th><th>${total.paidAny} / ${total.full}</th><th>${money(total.rec)}</th><th>${money(total.got)}</th><th>${total.rate.toFixed(1)}%</th></tr>`;
+ const subtitle=document.querySelector('#admin .sub');
+ if(subtitle)subtitle.textContent=`Reporting period: ${periodLabel}. Paid Flats column = paid at least once / fully paid for the selected period.`;
 }
 function analyticsSelection(){
  const fys=checked('xFY'),blocks=checked('xBlocks'),months=checked('xMonths'),flats=checked('xFlats');
  const flatSet=new Set(flats.map(x=>x.split(' | ')[0]));
  const recs=data.filter(r=>blocks.includes(r.block)&&flatSet.has(flatKey(r)));
  const selectedMonths=uniq(recs.flatMap(r=>r.months.filter(m=>fys.includes(m.fy)&&months.includes(m.month)).map(m=>m.monthKey))).sort();
- return {recs,selectedMonths,fys,blocks,months};
+ const dueMonths=selectedMonths.filter(k=>k<=currentMonthKey());
+ return {recs,selectedMonths,dueMonths,fys,blocks,months};
 }
 function renderAnalytics(){
- const {recs,selectedMonths}=analyticsSelection();let rec=0,got=0;
- recs.forEach(r=>selectedMonths.forEach(k=>{const m=r.months.find(x=>x.monthKey===k);rec+=r.fee;if(m&&m.receipt)got+=m.amount||0}));
+ const {recs,selectedMonths,dueMonths,fys,blocks,months}=analyticsSelection();let rec=0,got=0;
+ recs.forEach(r=>dueMonths.forEach(k=>{const m=r.months.find(x=>x.monthKey===k);rec+=r.fee;if(m&&m.receipt)got+=m.amount||0}));
  const pending=Math.max(0,rec-got),rate=rec?got/rec*100:0;
+ document.getElementById('analyticsScope').textContent=`Scope: ${fys.length?fys.join(', '):'No FY selected'} | ${blocks.length?blocks.map(b=>'Block '+b).join(', '):'No blocks selected'} | ${dueMonths.length} due months / ${selectedMonths.length} chart months | ${recs.length} flats. KPIs and detail totals use the same due-to-date calculation as Admin Summary; chart shows actual receipts in selected months.`;
  document.getElementById('xReceivable').textContent=money(rec);document.getElementById('xReceived').textContent=money(got);document.getElementById('xPending').textContent=money(pending);document.getElementById('xRate').textContent=rate.toFixed(1)+'%';
  const seriesMode=document.getElementById('xSeries').value, labels=selectedMonths.map(k=>{const m=recs.flatMap(r=>r.months).find(x=>x.monthKey===k);return m?m.month:k});
  const groups=seriesMode==='TOTAL'?['Overall']:seriesMode==='BLOCK'?uniq(recs.map(r=>r.block)).sort():recs.map(flatKey);
@@ -168,14 +219,19 @@ function renderAnalytics(){
  const datasets=groups.map((g,i)=>({label:seriesMode==='TOTAL'?g:seriesMode==='BLOCK'?'Block '+g:g,data:selectedMonths.map(k=>recs.filter(r=>seriesMode==='TOTAL'||(seriesMode==='BLOCK'?r.block===g:flatKey(r)===g)).reduce((s,r)=>{const m=r.months.find(x=>x.monthKey===k);return s+(m&&m.receipt?(m.amount||0):0)},0)),borderColor:colors[i%colors.length],backgroundColor:colors[i%colors.length],borderWidth:2,pointRadius:3,tension:.22}));
  if(chart)chart.destroy();chart=new Chart(document.getElementById('trendChart'),{type:'line',data:{labels,datasets},options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},plugins:{legend:{position:'bottom'}},scales:{y:{beginAtZero:true,ticks:{callback:v=>'₹'+Number(v).toLocaleString('en-IN')}}}}});
  const body=document.getElementById('analyticsBody');body.innerHTML='';
- recs.forEach(r=>{let rr=0,gg=0,pm=0;selectedMonths.forEach(k=>{rr+=r.fee;const m=r.months.find(x=>x.monthKey===k);if(m&&m.receipt){gg+=m.amount||0;pm++}});const pend=Math.max(0,rr-gg);const tr=document.createElement('tr');tr.innerHTML=`<td>Block ${r.block}</td><td>${r.flat}</td><td>${esc(r.name||'Name not available')}</td><td>${money(rr)}</td><td class="green">${money(gg)}</td><td class="red">${money(pend)}</td><td>${rr?(gg/rr*100).toFixed(1):'0.0'}%</td><td>${pm}</td><td>${selectedMonths.length-pm}</td>`;body.appendChild(tr)});
+ recs.forEach(r=>{let rr=0,gg=0,pm=0;dueMonths.forEach(k=>{rr+=r.fee;const m=r.months.find(x=>x.monthKey===k);if(m&&m.receipt){gg+=m.amount||0;pm++}});const pend=Math.max(0,rr-gg);const tr=document.createElement('tr');tr.innerHTML=`<td>Block ${r.block}</td><td>${r.flat}</td><td>${esc(r.name||'Name not available')}</td><td>${money(rr)}</td><td class="green">${money(gg)}</td><td class="red">${money(pend)}</td><td>${rr?(gg/rr*100).toFixed(1):'0.0'}%</td><td>${pm}</td><td>${selectedMonths.length-pm}</td>`;body.appendChild(tr)});
  if(!recs.length)body.innerHTML='<tr><td colspan="9">No flats match the filters.</td></tr>';
 }
 function resetAnalytics(){['xFY','xBlocks','xMonths','xFlats'].forEach(id=>setAll(id,true));renderAnalytics()}
 function esc(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
 function exportRows(rows,name){if(!window.XLSX){alert('Excel library is unavailable.');return}const ws=XLSX.utils.json_to_sheet(rows);const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,'Dashboard Export');XLSX.writeFile(wb,name)}
 function exportLedger(){exportRows(ledgerRows().map(({r,m,paid,amount,pending})=>({Block:r.block,Flat:r.flat,Resident:r.name,FY:m.fy,Month:m.month,Receipt:m.receipt,DefaultFee:r.fee,AmountPaid:amount,Pending:pending,Status:paid?'PAID':'UNPAID'})),'SAT_Flat_Ledger.xlsx')}
-function exportAdmin(){const mode=document.getElementById('aMode').value,fy=document.getElementById('aFY').value,month=document.getElementById('aMonth').value,months=periodMonths(mode,fy,month);exportRows(BLOCKS.map(b=>{const rr=data.filter(r=>r.block===b);return {Block:b,...summarize(rr,months),TotalFlats:rr.length}}),'SAT_Block_Summary.xlsx')}
+function exportAdmin(){
+ const mode=document.getElementById('aMode').value,fy=document.getElementById('aFY').value,month=document.getElementById('aMonth').value,months=periodMonths(mode,fy,month);
+ const rows=BLOCKS.map(b=>{const rr=data.filter(r=>r.block===b),s=summarize(rr,months);return {Block:'Block '+b,'Total Flats':rr.length,'Paid Flats (Any Payment)':s.paidAny,'Fully Paid Flats':s.full,'Total Receivable':s.rec,'Total Received':s.got,'Collection %':Number(s.rate.toFixed(1))}});
+ const total=summarize(data,months);rows.push({Block:'TOTAL','Total Flats':data.length,'Paid Flats (Any Payment)':total.paidAny,'Fully Paid Flats':total.full,'Total Receivable':total.rec,'Total Received':total.got,'Collection %':Number(total.rate.toFixed(1))});
+ exportRows(rows,'SAT_Block_Summary.xlsx');
+}
 function parseMonth(label,fyHint){
  const s=String(label||'').trim().replace(/\s+/g,' ').replace(/-\s*/g,'-');
  const m=s.match(/(April|May|June|July|August|September|October|November|December|January|February|March)\s*-\s*(\d{2,4})/i);if(!m)return null;
