@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Maintenance Dues Dashboard</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f6f9;
+            margin: 0;
+            padding: 15px;
+            color: #333;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        h2 { margin-top: 0; color: #2c3e50; font-size: 1.4rem; }
+        .filter-box {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        input, select {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 1rem;
+        }
+        .card {
+            background: #fdfdfd;
+            border: 1px solid #e1e4e8;
+            padding: 12px;
+            margin-bottom: 10px;
+            border-radius: 6px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .info h4 { margin: 0 0 5px 0; font-size: 1rem; color: #333; }
+        .info p { margin: 0; font-size: 0.85rem; color: #666; }
+        .badge {
+            padding: 5px 10px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: bold;
+        }
+        .paid { background-color: #d4edda; color: #155724; }
+        .pending { background-color: #f8d7da; color: #721c24; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>Community Dues Tracker</h2>
+    
+    <div class="filter-box">
+        <input type="text" id="searchInput" placeholder="Search flat or name..." onkeyup="filterDues()">
+        <select id="statusFilter" onchange="filterDues()">
+            <option value="ALL">All Status</option>
+            <option value="Paid">Paid</option>
+            <option value="Pending">Pending</option>
+        </select>
+    </div>
+
+    <div id="duesList">
+        <!-- Dynamic list items injected via JS -->
+    </div>
+</div>
+
+<script>
+    // Sample dues data
+    const duesData = [
+        { flat: "Flat 101", name: "Rajesh Kumar", amount: "₹2,500", status: "Paid" },
+        { flat: "Flat 102", name: "Sunitha Sharma", amount: "₹2,500", status: "Pending" },
+        { flat: "Flat 201", name: "Venkat Rao", amount: "₹2,500", status: "Paid" },
+        { flat: "Flat 202", name: "Anitha Reddy", amount: "₹2,500", status: "Pending" },
+        { flat: "Flat 301", name: "Ramesh Babu", amount: "₹2,500", status: "Paid" }
+    ];
+
+    function renderList(data) {
+        const container = document.getElementById('duesList');
+        container.innerHTML = '';
+        
+        if (data.length === 0) {
+            container.innerHTML = '<p style="text-align:center; color:#776;">No records found.</p>';
+            return;
+        }
+
+        data.forEach(item => {
+            const badgeClass = item.status === 'Paid' ? 'paid' : 'pending';
+            const card = document.createElement('div');
+            card.className = 'card';
+            card.innerHTML = `
+                <div class="info">
+                    <h4>${item.flat} - ${item.name}</h4>
+                    <p>Amount: ${item.amount}</p>
+                </div>
+                <span class="badge ${badgeClass}">${item.status}</span>
+            `;
+            container.appendChild(card);
+        });
+    }
+
+    function filterDues() {
+        const searchVal = document.getElementById('searchInput').value.toLowerCase();
+        const statusVal = document.getElementById('statusFilter').value;
+
+        const filtered = duesData.filter(item => {
+            const matchesSearch = item.flat.toLowerCase().includes(searchVal) || item.name.toLowerCase().includes(searchVal);
+            const matchesStatus = statusVal === 'ALL' || item.status === statusVal;
+            return matchesSearch && matchesStatus;
+        });
+
+        renderList(filtered);
+    }
+
+    // Initial render
+    renderList(duesData);
+</script>
+
+</body>
+</html>
