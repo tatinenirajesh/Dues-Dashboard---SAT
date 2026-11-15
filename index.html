@@ -110,6 +110,15 @@ const flatKey=r=>r.block+'-'+r.flat;
 function selected(id){const el=document.getElementById(id);return el.tagName==='SELECT'?[...el.selectedOptions].map(o=>o.value):[...el.querySelectorAll('input[type=checkbox]:checked')].map(x=>x.value)}
 function fillSelect(id,items,selectedAll=true){
  const el=document.getElementById(id);el.innerHTML='';
+ if(el.tagName==='SELECT'){
+  items.forEach((x,i)=>{
+   const option=document.createElement('option');
+   option.value=x;option.textContent=x;
+   option.selected=selectedAll && i===0;
+   el.appendChild(option);
+  });
+  return;
+ }
  items.forEach(x=>{
   const label=document.createElement('label'),cb=document.createElement('input');
   cb.type='checkbox';cb.value=x;cb.checked=selectedAll;
@@ -125,6 +134,12 @@ function initFilters(){
  const blocks=uniq(data.map(r=>r.block)).sort();
  fillSelect('lBlocks',blocks);fillSelect('lFlats',data.map(r=>flatKey(r)).sort());fillSelect('lFY',fyList());fillSelect('lMonths',monthList().map(fmtMonthKey));fillSelect('lStatus',['PAID','UNPAID']);
  fillSelect('aFY',fyList());fillSelect('aMonth',monthList().map(fmtMonthKey));
+ const todayKey=currentMonthKey();
+ const currentRecord=data.flatMap(r=>r.months).find(m=>m.monthKey===todayKey);
+ const fyControl=document.getElementById('aFY'),monthControl=document.getElementById('aMonth');
+ if(currentRecord&&[...fyControl.options].some(o=>o.value===currentRecord.fy))fyControl.value=currentRecord.fy;
+ if(currentRecord&&[...monthControl.options].some(o=>o.value===currentRecord.month))monthControl.value=currentRecord.month;
+ document.getElementById('aMode').value='MONTH';document.getElementById('aMonthWrap').classList.remove('hidden');
  ['xFY','xBlocks','xMonths','xFlats'].forEach(id=>document.getElementById(id).innerHTML='');
  addChecks('xFY',fyList());addChecks('xBlocks',blocks.map(b=>'Block '+b),blocks);addChecks('xMonths',monthList().map(fmtMonthKey));addChecks('xFlats',data.map(r=>r.block+'-'+r.flat+' | '+(r.name||'Name not available')).sort(),data.map(r=>flatKey(r)));
  document.getElementById('aMode').addEventListener('change',()=>{document.getElementById('aMonthWrap').classList.toggle('hidden',document.getElementById('aMode').value==='FY');renderAdmin()});
