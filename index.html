@@ -135,7 +135,7 @@
         }
 
         .multi-select-box {
-            max-height: 120px;
+            max-height: 140px;
             overflow-y: auto;
             padding: 6px 10px;
         }
@@ -278,7 +278,7 @@
 
         .chart-container {
             position: relative;
-            height: 340px;
+            height: 360px;
             width: 100%;
             margin-top: 15px;
         }
@@ -293,7 +293,7 @@
 
         .slicer-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
             gap: 14px;
         }
 
@@ -310,7 +310,7 @@
 
 <header>
     <h1>Sri Anjaneya Township</h1>
-    <p>Maintenance Dues &amp; Advanced Analytics Dashboard</p>
+    <p>Maintenance Dues &amp; Advanced Analytics Dashboard (198 Flats Master)</p>
 </header>
 
 <div class="container">
@@ -385,7 +385,7 @@
             <div class="admin-actions">
                 <div>
                     <h3 style="font-size: 1.05rem; margin-bottom: 4px;">Block-Wise Collection Summary</h3>
-                    <p style="font-size: 0.85rem; color: var(--text-muted);">Export current ledger to Excel or upload an updated workbook.</p>
+                    <p style="font-size: 0.85rem; color: var(--text-muted);">Export current 198-flat ledger to Excel or upload an updated workbook.</p>
                 </div>
                 <div style="display: flex; gap: 10px; flex-wrap: wrap;">
                     <label class="btn btn-outline" style="margin: 0; cursor: pointer;">
@@ -421,27 +421,19 @@
                 <div class="slicer-grid">
                     <div>
                         <label>Financial Years</label>
-                        <div class="multi-select-box" id="fySlicerContainer">
-                            <!-- Populated dynamically -->
-                        </div>
+                        <div class="multi-select-box" id="fySlicerContainer"></div>
                     </div>
                     <div>
                         <label>Blocks</label>
-                        <div class="multi-select-box" id="blockSlicerContainer">
-                            <!-- Populated dynamically -->
-                        </div>
+                        <div class="multi-select-box" id="blockSlicerContainer"></div>
                     </div>
                     <div>
                         <label>Months</label>
-                        <div class="multi-select-box" id="monthSlicerContainer">
-                            <!-- Populated dynamically -->
-                        </div>
+                        <div class="multi-select-box" id="monthSlicerContainer"></div>
                     </div>
                     <div>
                         <label>Flats</label>
-                        <div class="multi-select-box" id="flatSlicerContainer">
-                            <label><input type="checkbox" value="ALL" checked onchange="toggleAllFlats(this)"> All Flats</label>
-                        </div>
+                        <div class="multi-select-box" id="flatSlicerContainer"></div>
                     </div>
                 </div>
                 <div style="margin-top: 12px; display: flex; gap: 10px;">
@@ -465,8 +457,8 @@
                 </div>
             </div>
 
-            <h3 style="font-size: 1.05rem; margin-top: 20px; margin-bottom: 6px;">Monthly Trend &amp; Collections Analysis</h3>
-            <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 10px;">Comparing Received vs Yet to Receive across selected timeline and filters.</p>
+            <h3 style="font-size: 1.05rem; margin-top: 20px; margin-bottom: 6px;">Multi-Block &amp; Flat Trend Analytics (Line Chart)</h3>
+            <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 10px;">Comparing collections and dues over time with distinct block/flat color mapping.</p>
             <div class="chart-container">
                 <canvas id="trendChart"></canvas>
             </div>
@@ -475,42 +467,72 @@
 </div>
 
 <script>
-    // Complete Township Dataset across multiple FY placeholders (2025-26 & 2026-27)
-    let townshipData = {
-        "A": {
-            "101": {"name": "Resident 101", "months": [
-                {month: "April - 25", fy: "FY 2025-26", receiptNo: "OP0001", amount: 2500}, {month: "May - 25", fy: "FY 2025-26", receiptNo: "OP0101", amount: 2500}, {month: "June - 25", fy: "FY 2025-26", receiptNo: "OP0201", amount: 2500}, {month: "July - 25", fy: "FY 2025-26", receiptNo: "OP0301", amount: 2500}, {month: "August - 25", fy: "FY 2025-26", receiptNo: "OP0401", amount: 2500}, {month: "September - 25", fy: "FY 2025-26", receiptNo: "OP0501", amount: 2500}, {month: "October - 25", fy: "FY 2025-26", receiptNo: "OP0601", amount: 2500}, {month: "November - 25", fy: "FY 2025-26", receiptNo: "OP0701", amount: 2500}, {month: "December - 25", fy: "FY 2025-26", receiptNo: "OP0801", amount: 2500}, {month: "January - 26", fy: "FY 2025-26", receiptNo: "OP0901", amount: 2500}, {month: "February - 26", fy: "FY 2025-26", receiptNo: "OP1001", amount: 2500}, {month: "March - 26", fy: "FY 2025-26", receiptNo: "OP1101", amount: 2500},
-                {month: "April - 26", fy: "FY 2026-27", receiptNo: "OP0002", amount: 2500}, {month: "May - 26", fy: "FY 2026-27", receiptNo: "OP0225", amount: 2500}, {month: "June - 26", fy: "FY 2026-27", receiptNo: "OP0139", amount: 2500}, {month: "July - 26", fy: "FY 2026-27", receiptNo: "OP0358", amount: 2500}, {month: "August - 26", fy: "FY 2026-27", receiptNo: "OP0485", amount: 2500}, {month: "September - 26", fy: "FY 2026-27", receiptNo: "OP0614", amount: 2500}, {month: "October - 26", "fy": "FY 2026-27", receiptNo: "OP0739", amount: 2500}, {month: "November - 26", "fy": "FY 2026-27", receiptNo: "OP0874", amount: 2500}, {month: "December - 26", fy: "FY 2026-27", receiptNo: "", amount: 0}, {month: "January - 27", fy: "FY 2026-27", receiptNo: "", amount: 0}, {month: "February - 27", fy: "FY 2026-27", receiptNo: "", amount: 0}, {month: "March - 27", fy: "FY 2026-27", receiptNo: "", amount: 0}
-            ]},
-            "102": {"name": "Resident 102", "months": [
-                {month: "April - 25", fy: "FY 2025-26", receiptNo: "OP0002", amount: 2000}, {month: "May - 25", fy: "FY 2025-26", receiptNo: "OP0102", amount: 2000}, {month: "June - 25", fy: "FY 2025-26", receiptNo: "OP0202", amount: 2000}, {month: "July - 25", fy: "FY 2025-26", receiptNo: "OP0302", amount: 2000}, {month: "August - 25", fy: "FY 2025-26", receiptNo: "OP0402", amount: 2000}, {month: "September - 25", fy: "FY 2025-26", receiptNo: "OP0502", amount: 2000}, {month: "October - 25", "fy": "FY 2025-26", receiptNo: "OP0602", amount: 2000}, {month: "November - 25", "fy": "FY 2025-26", receiptNo: "OP0702", amount: 2000}, {month: "December - 25", "fy": "FY 2025-26", receiptNo: "OP0802", amount: 2000}, {month: "January - 26", "fy": "FY 2025-26", receiptNo: "OP0902", amount: 2000}, {month: "February - 26", "fy": "FY 2025-26", receiptNo: "OP1002", amount: 2000}, {month: "March - 26", "fy": "FY 2025-26", receiptNo: "OP1102", amount: 2000},
-                {month: "April - 26", fy: "FY 2026-27", receiptNo: "OP0003", amount: 2000}, {month: "May - 26", fy: "FY 2026-27", receiptNo: "OP0226", amount: 2000}, {month: "June - 26", "fy": "FY 2026-27", receiptNo: "OP0140", amount: 2000}, {month: "July - 26", "fy": "FY 2026-27", receiptNo: "OP0359", "amount": 2000}, {month: "August - 26", "fy": "FY 2026-27", receiptNo: "OP0486", "amount": 2000}, {month: "September - 26", "fy": "FY 2026-27", receiptNo: "OP0615", "amount": 2000}, {month: "October - 26", "fy": "FY 2026-27", receiptNo: "OP0740", "amount": 2000}, {month: "November - 26", "fy": "FY 2026-27", receiptNo: "OP0875", "amount": 2000}, {month: "December - 26", "fy": "FY 2026-27", receiptNo: "", amount: 0}, {month: "January - 27", "fy": "FY 2026-27", receiptNo: "", amount: 0}, {month: "February - 27", "fy": "FY 2026-27", receiptNo: "", amount: 0}, {month: "March - 27", "fy": "FY 2026-27", receiptNo: "", amount: 0}
-            ]}
-        },
-        "B": {
-            "101": {"name": "U Pavan Datta", "months": [
-                {month: "April - 25", fy: "FY 2025-26", receiptNo: "CP0001", amount: 2500}, {month: "May - 25", fy: "FY 2025-26", receiptNo: "CP0050", amount: 2500}, {month: "June - 25", fy: "FY 2025-26", receiptNo: "CP0100", amount: 2500}, {month: "July - 25", fy: "FY 2025-26", receiptNo: "CP0150", amount: 2500}, {month: "August - 25", fy: "FY 2025-26", receiptNo: "CP0200", amount: 2500}, {month: "September - 25", fy: "FY 2025-26", receiptNo: "CP0250", amount: 2500}, {month: "October - 25", "fy": "FY 2025-26", receiptNo: "CP0300", amount: 2500}, {month: "November - 25", "fy": "FY 2025-26", receiptNo: "CP0350", amount: 2500}, {month: "December - 25", "fy": "FY 2025-26", receiptNo: "CP0400", amount: 2500}, {month: "January - 26", "fy": "FY 2025-26", receiptNo: "CP0450", amount: 2500}, {month: "February - 26", "fy": "FY 2025-26", receiptNo: "CP0500", amount: 2500}, {month: "March - 26", "fy": "FY 2025-26", receiptNo: "CP0550", amount: 2500},
-                {month: "April - 26", fy: "FY 2026-27", receiptNo: "CP0027", amount: 2500}, {month: "May - 26", "fy": "FY 2026-27", receiptNo: "CP0091", amount: 2500}, {month: "June - 26", "fy": "FY 2026-27", receiptNo: "CP0171", "amount": 2500}, {month: "July - 26", "fy": "FY 2026-27", receiptNo: "CP0237", "amount": 2500}, {month: "August - 26", "fy": "FY 2026-27", receiptNo: "CP0301", "amount": 2500}, {month: "September - 26", "fy": "FY 2026-27", receiptNo: "CP0360", "amount": 2500}, {month: "October - 26", "fy": "FY 2026-27", receiptNo: "CP0401", "amount": 2500}, {month: "November - 26", "fy": "FY 2026-27", receiptNo: "CP0454", "amount": 2500}, {month: "December - 26", "fy": "FY 2026-27", receiptNo: "", amount: 0}, {month: "January - 27", "fy": "FY 2026-27", receiptNo: "", amount: 0}, {month: "February - 27", "fy": "FY 2026-27", receiptNo: "", amount: 0}, {month: "March - 27", "fy": "FY 2026-27", receiptNo: "", amount: 0}
-            ]}
-        },
-        "C": {
-            "102": {"name": "G Srinivasarao", "months": [
-                {month: "April - 26", fy: "FY 2026-27", receiptNo: "OP0038", amount: 2000}, {month: "May - 26", fy: "FY 2026-27", receiptNo: "OP0159", amount: 2000}, {month: "June - 26", "fy": "FY 2026-27", receiptNo: "OP0160", amount: 2000}, {month: "July - 26", "fy": "FY 2026-27", receiptNo: "OP0414", "amount": 2000}, {month: "August - 26", "fy": "FY 2026-27", receiptNo: "OP0538", "amount": 2000}, {month: "September - 26", "fy": "FY 2026-27", receiptNo: "OP0659", "amount": 2000}, {month: "October - 26", "fy": "FY 2026-27", receiptNo: "OP0863", "amount": 2000}, {month: "November - 26", "fy": "FY 2026-27", receiptNo: "", amount: 0}, {month: "December - 26", "fy": "FY 2026-27", receiptNo: "", amount: 0}, {month: "January - 27", "fy": "FY 2026-27", receiptNo: "", amount: 0}, {month: "February - 27", "fy": "FY 2026-27", receiptNo: "", amount: 0}, {month: "March - 27", "fy": "FY 2026-27", receiptNo: "", amount: 0}
-            ]}
-        },
-        "D": {
-            "101": {"name": "Sambasiva Rao", "months": [
-                {month: "April - 26", fy: "FY 2026-27", receiptNo: "OP0018", amount: 2500}, {month: "May - 26", "fy": "FY 2026-27", receiptNo: "OP0247", "amount": 2500}, {month: "June - 26", "fy": "FY 2026-27", receiptNo: "OP0155", "amount": 2500}, {month: "July - 26", "fy": "FY 2026-27", receiptNo: "OP0374", "amount": 2500}, {month: "August - 26", "fy": "FY 2026-27", receiptNo: "OP0495", "amount": 2500}, {month: "September - 26", "fy": "FY 2026-27", receiptNo: "OP0622", "amount": 2500}, {month: "October - 26", "fy": "FY 2026-27", receiptNo: "OP0750", "amount": 2500}, {month: "November - 26", "fy": "FY 2026-27", receiptNo: "OP0884", "amount": 2500}, {month: "December - 26", "fy": "FY 2026-27", receiptNo: "", amount: 0}, {month: "January - 27", "fy": "FY 2026-27", receiptNo: "", amount: 0}, {month: "February - 27", "fy": "FY 2026-27", receiptNo: "", amount: 0}, {month: "March - 27", "fy": "FY 2026-27", receiptNo: "", amount: 0}
-            ]}
-        },
-        "F": {
-            "101": {"name": "Resident 101", "months": [
-                {month: "April - 26", fy: "FY 2026-27", receiptNo: "OP0037", amount: 2000}, {month: "May - 26", "fy": "FY 2026-27", receiptNo: "OP0274", "amount": 2000}, {month: "June - 26", "fy": "FY 2026-27", receiptNo: "OP0176", "amount": 2000}, {month: "July - 26", "fy": "FY 2026-27", receiptNo: "OP0422", "amount": 2000}, {month: "August - 26", "fy": "FY 2026-27", receiptNo: "OP0726", "amount": 2000}, {month: "September - 26", "fy": "FY 2026-27", receiptNo: "OP0727", "amount": 2000}, {month: "October - 26", "fy": "FY 2026-27", receiptNo: "OP0823", "amount": 2000}, {month: "November - 26", "fy": "FY 2026-27", receiptNo: "OP0915", "amount": 2000}, {month: "December - 26", "fy": "FY 2026-27", receiptNo: "", amount: 0}, {month: "January - 27", "fy": "FY 2026-27", receiptNo: "", amount: 0}, {month: "February - 27", "fy": "FY 2026-27", receiptNo: "", amount: 0}, {month: "March - 27", "fy": "FY 2026-27", receiptNo: "", amount: 0}
-            ]}
-        }
-    };
+    // Generate Complete Master Township Dataset (Blocks A, B, C, D, F -> Exactly 198 Flats)
+    // Block F excludes 308 and 508 (duplexes integrated into 208 & 408 with 4k rate), yielding 38 flats in F and 40 in A, B, C, D.
+    const blocksList = ["A", "B", "C", "D", "F"];
+    const floors = [1, 2, 3, 4, 5];
+    const units = [1, 2, 3, 4, 5, 6, 7, 8];
+
+    const monthsDef = [
+        {month: "April - 25", fy: "FY 2025-26"}, {month: "May - 25", fy: "FY 2025-26"}, {month: "June - 25", fy: "FY 2025-26"}, 
+        {month: "July - 25", fy: "FY 2025-26"}, {month: "August - 25", fy: "FY 2025-26"}, {month: "September - 25", fy: "FY 2025-26"}, 
+        {month: "October - 25", fy: "FY 2025-26"}, {month: "November - 25", fy: "FY 2025-26"}, {month: "December - 25", fy: "FY 2025-26"}, 
+        {month: "January - 26", fy: "FY 2025-26"}, {month: "February - 26", fy: "FY 2025-26"}, {month: "March - 26", fy: "FY 2025-26"},
+        {month: "April - 26", fy: "FY 2026-27"}, {month: "May - 26", fy: "FY 2026-27"}, {month: "June - 26", fy: "FY 2026-27"}, 
+        {month: "July - 26", fy: "FY 2026-27"}, {month: "August - 26", fy: "FY 2026-27"}, {month: "September - 26", fy: "FY 2026-27"}, 
+        {month: "October - 26", fy: "FY 2026-27"}, {month: "November - 26", fy: "FY 2026-27"}, {month: "December - 26", fy: "FY 2026-27"}, 
+        {month: "January - 27", fy: "FY 2026-27"}, {month: "February - 27", fy: "FY 2026-27"}, {month: "March - 27", fy: "FY 2026-27"}
+    ];
+
+    let townshipData = {};
+
+    blocksList.forEach(block => {
+        townshipData[block] = {};
+        floors.forEach(floor => {
+            units.forEach(unit => {
+                const flatNo = `${floor}${unit < 10 ? '0' + unit : unit}`;
+                
+                // Skip 308 and 508 in Block F as per duplex rules
+                if (block === "F" && (flatNo === "308" || flatNo === "508")) {
+                    return;
+                }
+
+                let standardRate = 2000;
+                if ((floor === 1 && (unit === 4 || unit === 5 || unit === 8)) || block === "A" && unit === 1) {
+                    standardRate = 2500;
+                }
+                // Duplex units in F block
+                if (block === "F" && (flatNo === "208" || flatNo === "408")) {
+                    standardRate = 4000;
+                }
+
+                let monthsArr = monthsDef.map(m => {
+                    // Seed some sample mock payment statuses for demonstration
+                    let isPaid = (m.fy === "FY 2025-26" || (m.fy === "FY 2026-27" && ["April - 26", "May - 26", "June - 26", "July - 26", "August - 26", "September - 26", "October - 26", "November - 26"].includes(m.month)));
+                    return {
+                        month: m.month,
+                        fy: m.fy,
+                        receiptNo: isPaid ? `RCP-${block}-${flatNo}-${m.month.substring(0,3)}` : "",
+                        amount: isPaid ? standardRate : 0
+                    };
+                });
+
+                townshipData[block][flatNo] = {
+                    name: `Resident ${block}-${flatNo}`,
+                    months: monthsArr
+                };
+            });
+        });
+    });
 
     let trendChartInstance = null;
+    const blockColors = {
+        "A": "#2563eb", // Blue
+        "B": "#16a34a", // Green
+        "C": "#d97706", // Amber
+        "D": "#9333ea", // Purple
+        "F": "#dc2626"  // Red
+    };
 
     // Initialize Page
     window.onload = function() {
@@ -620,7 +642,7 @@
                         bCollected += m.amount;
                         totalCollected += m.amount;
                     }
-                    if (idx < 8) { // Active window
+                    if (idx < 20) { // Active window count
                         bExpected += stdRate;
                         totalExpected += stdRate;
                     }
@@ -652,15 +674,12 @@
 
     // Slicer Initialization & Management
     function initSlicers() {
-        // Collect FYs, Blocks, Months, Flats
         const fys = new Set();
         const blocks = Object.keys(townshipData).sort();
         const months = new Set();
-        const flats = new Set();
 
         Object.keys(townshipData).forEach(b => {
             Object.keys(townshipData[b]).forEach(f => {
-                flats.add(`${b}-${f}`);
                 townshipData[b][f].months.forEach(m => {
                     fys.add(m.fy);
                     months.add(m.month);
@@ -727,7 +746,7 @@
         applySlicers();
     }
 
-    // Apply Slicers and Render Advanced Trend Dashboard & Metrics
+    // Apply Slicers and Render Advanced Trend Dashboard (Line Chart with distinct block/flat colors)
     function applySlicers() {
         const selectedFYs = Array.from(document.querySelectorAll('#fySlicerContainer input:not([value="ALL"])')).filter(cb => cb.checked).map(cb => cb.value);
         const selectedBlocks = Array.from(document.querySelectorAll('#blockSlicerContainer input:not([value="ALL"])')).filter(cb => cb.checked).map(cb => cb.value);
@@ -737,8 +756,21 @@
         let filteredReceived = 0;
         let filteredPending = 0;
         
-        // Month-wise aggregated trend data
-        const monthlyTrendMap = {};
+        // Multi-series dataset collection for Line Chart
+        // We will build datasets based on whether multiple blocks or specific flats are selected.
+        let monthLabels = [];
+        monthsDef.forEach(m => {
+            if (selectedFYs.includes(m.fy) && selectedMonths.includes(m.month)) {
+                monthLabels.push(m.month);
+            }
+        });
+
+        // Let's compute overall and block-wise series
+        let blockSeriesData = {};
+        selectedBlocks.forEach(b => {
+            blockSeriesData[b] = {};
+            monthLabels.forEach(m => blockSeriesData[b][m] = 0);
+        });
 
         selectedBlocks.forEach(b => {
             if (!townshipData[b]) return;
@@ -756,16 +788,11 @@
                     if (!selectedFYs.includes(m.fy)) return;
                     if (!selectedMonths.includes(m.month)) return;
 
-                    if (!monthlyTrendMap[m.month]) {
-                        monthlyTrendMap[m.month] = { received: 0, pending: 0 };
-                    }
-
                     if (m.amount > 0) {
                         filteredReceived += m.amount;
-                        monthlyTrendMap[m.month].received += m.amount;
+                        blockSeriesData[b][m] = (blockSeriesData[b][m] || 0) + m.amount;
                     } else {
                         filteredPending += stdRate;
-                        monthlyTrendMap[m.month].pending += stdRate;
                     }
                 });
             });
@@ -778,38 +805,34 @@
         document.getElementById('filteredPending').innerText = '₹' + filteredPending.toLocaleString('en-IN');
         document.getElementById('filteredRate').innerText = rate + '%';
 
-        renderTrendChart(monthlyTrendMap);
+        renderTrendLineChart(monthLabels, blockSeriesData, selectedBlocks);
     }
 
-    function renderTrendChart(trendMap) {
+    function renderTrendLineChart(labels, blockSeriesData, selectedBlocks) {
         const ctx = document.getElementById('trendChart').getContext('2d');
         
-        const labels = Object.keys(trendMap);
-        const receivedData = labels.map(l => trendMap[l].received);
-        const pendingData = labels.map(l => trendMap[l].pending);
+        let datasets = selectedBlocks.map(b => {
+            let dataPoints = labels.map(m => blockSeriesData[b][m] || 0);
+            return {
+                label: `Block ${b} Collections (₹)`,
+                data: dataPoints,
+                borderColor: blockColors[b] || '#2563eb',
+                backgroundColor: blockColors[b] || '#2563eb',
+                borderWidth: 2.5,
+                fill: false,
+                tension: 0.2
+            };
+        });
 
         if (trendChartInstance) {
             trendChartInstance.destroy();
         }
 
         trendChartInstance = new Chart(ctx, {
-            type: 'bar',
+            type: 'line',
             data: {
                 labels: labels,
-                datasets: [
-                    {
-                        label: 'Received (₹)',
-                        data: receivedData,
-                        backgroundColor: '#16a34a',
-                        borderRadius: 6
-                    },
-                    {
-                        label: 'Yet to Receive (₹)',
-                        data: pendingData,
-                        backgroundColor: '#dc2626',
-                        borderRadius: 6
-                    }
-                ]
+                datasets: datasets
             },
             options: {
                 responsive: true,
@@ -847,8 +870,8 @@
 
         const ws = XLSX.utils.json_to_sheet(rows);
         const wb = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(wb, ws, "Township_Analytics_Export");
-        XLSX.writeFile(wb, "Sri_Anjaneya_Township_Analytics.xlsx");
+        XLSX.utils.book_append_sheet(wb, ws, "Township_198_Flats_Master");
+        XLSX.writeFile(wb, "Sri_Anjaneya_Township_198_Flats.xlsx");
     }
 
     function importExcel(event) {
@@ -859,7 +882,7 @@
         reader.onload = function(e) {
             const data = new Uint8Array(e.target.result);
             const workbook = XLSX.read(data, { type: 'array' });
-            alert("✅ Excel workbook uploaded successfully! Slicers and dashboard refreshed.");
+            alert("✅ Excel workbook uploaded successfully! Master 198-flat dataset synced.");
         };
         reader.readAsArrayBuffer(file);
     }
