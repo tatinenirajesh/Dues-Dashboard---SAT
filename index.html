@@ -30,7 +30,7 @@ select[multiple]{height:118px}.actions{display:flex;gap:8px;flex-wrap:wrap;align
 .filter-dropdown .filterbox{height:190px;border:0;padding:2px;overflow:auto}
 .filter-dropdown .filter-head{margin:0 0 6px;padding-bottom:5px;border-bottom:1px solid var(--line)}
 .filter-dropdown .filter-head button{font-size:11px}
-.analytics-kpis{grid-template-columns:repeat(3,minmax(0,1fr))}
+.analytics-kpis{grid-template-columns:repeat(3,minmax(0,1fr))}.ledger-dropdown-grid{grid-template-columns:repeat(4,minmax(180px,1fr))}.ledger-dropdown-grid .filterbox{height:180px}
 .table-heading{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:10px}
 .table-heading .section-title{margin:0}
 th.sortable{cursor:pointer;user-select:none}
@@ -52,13 +52,13 @@ th.sortable[data-sort-direction="desc"]:after{content:" ↓";color:var(--blue)}
 </nav>
 <section id="ledger" class="panel active">
 <div class="card">
-<h2 class="section-title">Flat Ledger Filters</h2><p class="sub">Select one or more blocks, flats, financial years, months and payment statuses. All selections are multi-select.</p>
-<div class="grid">
-<div class="field"><label for="lBlocks">Blocks</label><select id="lBlocks" multiple></select></div>
-<div class="field"><label for="lFlats">Flats</label><select id="lFlats" multiple></select></div>
-<div class="field"><label for="lFY">Financial Years</label><select id="lFY" multiple></select></div>
-<div class="field"><label for="lMonths">Months</label><select id="lMonths" multiple></select></div>
-<div class="field"><label for="lStatus">Payment Status</label><select id="lStatus" multiple><option value="PAID" selected>Paid</option><option value="UNPAID" selected>Unpaid</option></select></div>
+<h2 class="section-title">Flat Ledger Filters</h2><p class="sub">Use dropdown filters to select blocks, flats, financial years, months and payment statuses.</p>
+<div class="filter-grid dropdown-grid ledger-dropdown-grid">
+<div class="filter-dropdown"><details><summary><span>Blocks</span><small id="lBlocksCount">All selected</small></summary><div class="filter-dropdown-menu"><div class="filter-head"><button type="button" onclick="setLedgerAll('lBlocks',true)">Select all</button><button type="button" onclick="setLedgerAll('lBlocks',false)">Unselect all</button></div><div class="filterbox" id="lBlocks"></div></div></details></div>
+<div class="filter-dropdown"><details><summary><span>Flats</span><small id="lFlatsCount">All selected</small></summary><div class="filter-dropdown-menu"><div class="filter-head"><button type="button" onclick="setLedgerAll('lFlats',true)">Select all</button><button type="button" onclick="setLedgerAll('lFlats',false)">Unselect all</button></div><div class="filterbox" id="lFlats"></div></div></details></div>
+<div class="filter-dropdown"><details><summary><span>Financial Years</span><small id="lFYCount">All selected</small></summary><div class="filter-dropdown-menu"><div class="filter-head"><button type="button" onclick="setLedgerAll('lFY',true)">Select all</button><button type="button" onclick="setLedgerAll('lFY',false)">Unselect all</button></div><div class="filterbox" id="lFY"></div></div></details></div>
+<div class="filter-dropdown"><details><summary><span>Months</span><small id="lMonthsCount">All selected</small></summary><div class="filter-dropdown-menu"><div class="filter-head"><button type="button" onclick="setLedgerAll('lMonths',true)">Select all</button><button type="button" onclick="setLedgerAll('lMonths',false)">Unselect all</button></div><div class="filterbox" id="lMonths"></div></div></details></div>
+<div class="filter-dropdown"><details><summary><span>Payment Status</span><small id="lStatusCount">All selected</small></summary><div class="filter-dropdown-menu"><div class="filter-head"><button type="button" onclick="setLedgerAll('lStatus',true)">Select all</button><button type="button" onclick="setLedgerAll('lStatus',false)">Unselect all</button></div><div class="filterbox" id="lStatus"></div></div></details></div>
 </div><div class="actions" style="margin-top:12px"><button class="btn" onclick="renderLedger()">Apply Filters</button><button class="btn secondary" onclick="resetLedgerFilters()">Reset</button><button class="btn secondary right" onclick="exportTableExcel('ledgerTable','SAT_Flat_Ledger.xlsx','Flat Ledger')">Export Excel</button><button class="btn secondary" onclick="exportTablePDF('ledgerTable','Sri Anjaneya Township - Flat Ledger')">Export PDF</button></div>
 </div>
 <div class="kpis">
@@ -107,21 +107,29 @@ const BLOCKS=['A','B','C','D','F'];
 const money=n=>'₹'+Number(n||0).toLocaleString('en-IN',{maximumFractionDigits:2});
 const uniq=a=>[...new Set(a)];
 const flatKey=r=>r.block+'-'+r.flat;
-function selected(id){return [...document.getElementById(id).selectedOptions].map(o=>o.value)}
-function fillSelect(id,items,selectedAll=true){const el=document.getElementById(id);el.innerHTML='';items.forEach(x=>{const o=document.createElement('option');o.value=x;o.textContent=x;o.selected=selectedAll;el.appendChild(o)})}
+function selected(id){const el=document.getElementById(id);return el.tagName==='SELECT'?[...el.selectedOptions].map(o=>o.value):[...el.querySelectorAll('input[type=checkbox]:checked')].map(x=>x.value)}
+function fillSelect(id,items,selectedAll=true){
+ const el=document.getElementById(id);el.innerHTML='';
+ items.forEach(x=>{
+  const label=document.createElement('label'),cb=document.createElement('input');
+  cb.type='checkbox';cb.value=x;cb.checked=selectedAll;
+  cb.addEventListener('change',()=>onLedgerFilterChange(id));
+  label.append(cb,document.createTextNode(x));el.appendChild(label);
+ });
+ updateLedgerDropdownCounts();
+}
 function fyList(){return uniq(data.flatMap(r=>r.months.map(m=>m.fy))).sort()}
 function monthList(){return uniq(data.flatMap(r=>r.months.map(m=>m.monthKey+'|'+m.month))).sort()}
 function fmtMonthKey(k){return k.split('|')[1]||k}
 function initFilters(){
  const blocks=uniq(data.map(r=>r.block)).sort();
- fillSelect('lBlocks',blocks);fillSelect('lFlats',data.map(r=>flatKey(r)).sort());fillSelect('lFY',fyList());fillSelect('lMonths',monthList().map(fmtMonthKey));
+ fillSelect('lBlocks',blocks);fillSelect('lFlats',data.map(r=>flatKey(r)).sort());fillSelect('lFY',fyList());fillSelect('lMonths',monthList().map(fmtMonthKey));fillSelect('lStatus',['PAID','UNPAID']);
  fillSelect('aFY',fyList());fillSelect('aMonth',monthList().map(fmtMonthKey));
  ['xFY','xBlocks','xMonths','xFlats'].forEach(id=>document.getElementById(id).innerHTML='');
  addChecks('xFY',fyList());addChecks('xBlocks',blocks.map(b=>'Block '+b),blocks);addChecks('xMonths',monthList().map(fmtMonthKey));addChecks('xFlats',data.map(r=>r.block+'-'+r.flat+' | '+(r.name||'Name not available')).sort(),data.map(r=>flatKey(r)));
- document.getElementById('lBlocks').addEventListener('change',updateLedgerFlatOptions);
  document.getElementById('aMode').addEventListener('change',()=>{document.getElementById('aMonthWrap').classList.toggle('hidden',document.getElementById('aMode').value==='FY');renderAdmin()});
  document.getElementById('xSeries').addEventListener('change',renderAnalytics);
- updateLedgerFlatOptions();refreshCrossFilters();renderLedger();renderAdmin();renderAnalytics();initTableSorting();
+ updateLedgerFlatOptions();updateLedgerDropdownCounts();refreshCrossFilters();renderLedger();renderAdmin();renderAnalytics();initTableSorting();
 }
 function addChecks(id,items,values){
  const box=document.getElementById(id);box.innerHTML='';
@@ -175,11 +183,44 @@ function refreshCrossFilters(changedId){
  });
  updateDropdownCounts();
 }
-function updateLedgerFlatOptions(){
- const blocks=selected('lBlocks');const flats=data.filter(r=>blocks.includes(r.block)).map(flatKey).sort();
- fillSelect('lFlats',flats);
+function updateLedgerDropdownCounts(){
+ ['lBlocks','lFlats','lFY','lMonths','lStatus'].forEach(id=>{
+  const inputs=[...document.querySelectorAll('#'+id+' input[type=checkbox]')];
+  const count=inputs.filter(x=>x.checked).length;
+  const text=count===inputs.length?'All selected':count===0?'None selected':count+' selected';
+  const target=document.getElementById(id+'Count');if(target)target.textContent=text;
+ });
 }
-function resetLedgerFilters(){['lBlocks','lFlats','lFY','lMonths','lStatus'].forEach(id=>[...document.getElementById(id).options].forEach(o=>o.selected=true));updateLedgerFlatOptions();renderLedger()}
+function updateLedgerFlatOptions(){
+ const blocks=selected('lBlocks');
+ const oldInputs=[...document.querySelectorAll('#lFlats input[type=checkbox]')];
+ const prior=new Set(oldInputs.filter(x=>x.checked).map(x=>x.value));
+ const wasAllSelected=prior.size===oldInputs.length;
+ const flats=data.filter(r=>blocks.includes(r.block)).map(flatKey).sort();
+ const el=document.getElementById('lFlats');el.innerHTML='';
+ flats.forEach(f=>{
+  const label=document.createElement('label'),cb=document.createElement('input');
+  cb.type='checkbox';cb.value=f;cb.checked=wasAllSelected||prior.has(f);
+  cb.addEventListener('change',()=>onLedgerFilterChange('lFlats'));
+  label.append(cb,document.createTextNode(f));el.appendChild(label);
+ });
+ updateLedgerDropdownCounts();
+}
+function onLedgerFilterChange(id){
+ if(id==='lBlocks')updateLedgerFlatOptions();
+ updateLedgerDropdownCounts();
+ renderLedger();
+}
+function setLedgerAll(id,on){
+ document.querySelectorAll('#'+id+' input[type=checkbox]').forEach(cb=>cb.checked=on);
+ if(id==='lBlocks')updateLedgerFlatOptions();
+ updateLedgerDropdownCounts();
+ renderLedger();
+}
+function resetLedgerFilters(){
+ ['lBlocks','lFlats','lFY','lMonths','lStatus'].forEach(id=>document.querySelectorAll('#'+id+' input[type=checkbox]').forEach(cb=>cb.checked=true));
+ updateLedgerFlatOptions();updateLedgerDropdownCounts();renderLedger();
+}
 function ledgerRows(){
  const bs=selected('lBlocks'),fs=selected('lFlats'), fys=selected('lFY'), ms=selected('lMonths'), sts=selected('lStatus');
  const rows=[];
